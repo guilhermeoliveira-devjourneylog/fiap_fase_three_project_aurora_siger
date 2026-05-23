@@ -380,3 +380,9 @@ if __name__ == "__main__":
     # ==============================================
 
     sistema.exibir_dashboard()
+
+    # ==============================================
+    # MANTÉM TERMINAL ABERTO
+    # ==============================================
+
+    input("\nPressione ENTER para encerrar o sistema Aurora...")
