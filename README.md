@@ -4,18 +4,18 @@
 
 [Run](doc/run.md)
 
-[designer system use case](system_designer/use_case.plantuml)
+[uml systemdesigner use case](system_designer/use_case.plantuml)
 
-[designer system activity](system_designer/activity.plantuml)
+[uml systemdesigner activity](system_designer/activity.plantuml)
 
-[designer system state](system_designer/state.plantuml)
+[uml systemdesigner state](system_designer/state.plantuml)
 
-[designer system transition](system_designer/transition.plantuml)
+[uml systemdesigner transition](system_designer/transition.plantuml)
 
-[designer system sequence](system_designer/sequence.plantuml)
+[uml systemdesigner sequence](system_designer/sequence.plantuml)
 
-[designer system components](system_designer/components.plantuml)
+[uml systemdesigner components](system_designer/components.plantuml)
 
-[designer system methods](system_designer/methods.plantuml)
+[uml systemdesigner methods](system_designer/methods.plantuml)
 
 
