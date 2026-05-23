@@ -1,0 +1,22 @@
+@startuml
+
+state NORMAL
+state ALERTA
+state ECONOMIA
+state CRITICO
+state RECUPERACAO
+
+NORMAL --> ALERTA : energia < limite
+NORMAL --> ECONOMIA : reserva crítica
+NORMAL --> CRITICO : múltiplas falhas
+
+ALERTA --> NORMAL : sensores estabilizados
+ALERTA --> CRITICO : falha em cascata
+
+ECONOMIA --> NORMAL : geração suficiente
+ECONOMIA --> CRITICO : consumo excessivo
+
+CRITICO --> RECUPERACAO : isolamento concluído
+RECUPERACAO --> NORMAL : operação restaurada
+
+@enduml

@@ -1,0 +1,47 @@
+@startuml
+
+start
+
+:Coletar dados dos sensores;
+
+:Validar dados recebidos;
+
+if (Dados válidos?) then (Sim)
+
+    :Armazenar telemetria;
+    
+    :Executar processamento;
+    
+    :Atualizar vetores e matrizes;
+    
+    :Executar regressão linear;
+
+    if (Risco identificado?) then (Sim)
+
+        :Classificar criticidade;
+        
+        :Gerar alerta;
+        
+        :Priorizar subsistemas;
+        
+        :Executar automação;
+
+    else (Não)
+
+        :Atualizar painel operacional;
+
+    endif
+
+else (Não)
+
+    :Registrar inconsistência;
+    
+    :Gerar alerta operacional;
+
+endif
+
+:Monitorar estado da colônia;
+
+stop
+
+@enduml

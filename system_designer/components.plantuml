@@ -1,0 +1,32 @@
+@startuml
+
+package "Aurora Siger" {
+
+    [Camada de Sensores]
+    [Camada de Armazenamento]
+    [Camada de Processamento]
+    [Motor de Decisão]
+    [Sistema de Alertas]
+    [Painel Operacional]
+    [Banco de Dados]
+    [API Interna]
+
+}
+
+[Camada de Sensores] --> [Camada de Processamento]
+
+[Camada de Processamento] --> [Camada de Armazenamento]
+
+[Camada de Armazenamento] --> [Banco de Dados]
+
+[Camada de Processamento] --> [Motor de Decisão]
+
+[Motor de Decisão] --> [Sistema de Alertas]
+
+[Sistema de Alertas] --> [Painel Operacional]
+
+[API Interna] --> [Camada de Sensores]
+[API Interna] --> [Camada de Processamento]
+[API Interna] --> [Motor de Decisão]
+
+@enduml

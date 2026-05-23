@@ -1,0 +1,36 @@
+@startuml
+
+actor Sensor
+participant "Camada de Sensores" as Sensores
+participant "Armazenamento" as Storage
+participant "Processamento" as Processamento
+participant "Motor de Decisão" as Decisao
+participant "Sistema de Alertas" as Alertas
+participant "Painel Operacional" as Dashboard
+
+Sensor -> Sensores : enviar telemetria
+
+Sensores -> Processamento : validar dados
+
+Processamento -> Storage : armazenar dados
+
+Processamento -> Processamento : calcular médias\natualizar matrizes
+
+Processamento -> Decisao : enviar análise
+
+Decisao -> Decisao : executar regressão linear
+
+Decisao -> Decisao : classificar risco
+
+alt risco crítico
+
+    Decisao -> Alertas : gerar alerta crítico
+    Alertas -> Dashboard : exibir alerta
+
+else operação normal
+
+    Decisao -> Dashboard : atualizar status
+
+end
+
+@enduml

@@ -1,0 +1,55 @@
+@startuml
+
+class SensorManager {
+    +coletar_dados()
+    +validar_dados()
+    +monitorar_integridade()
+}
+
+class StorageManager {
+    +armazenar_telemetria()
+    +consultar_historico()
+    +atualizar_hash()
+}
+
+class ProcessingEngine {
+    +calcular_media()
+    +atualizar_matriz()
+    +processar_estatisticas()
+    +executar_agregacoes()
+}
+
+class PredictionEngine {
+    +executar_regressao_linear()
+    +prever_geracao()
+    +simular_cenarios()
+}
+
+class DecisionEngine {
+    +analisar_risco()
+    +priorizar_subsistemas()
+    +executar_automacao()
+    +alterar_estado()
+}
+
+class AlertManager {
+    +gerar_alerta()
+    +classificar_alerta()
+    +notificar_operador()
+}
+
+class Dashboard {
+    +exibir_consumo()
+    +exibir_geracao()
+    +exibir_alertas()
+    +renderizar_estado()
+}
+
+SensorManager --> ProcessingEngine
+ProcessingEngine --> StorageManager
+ProcessingEngine --> PredictionEngine
+PredictionEngine --> DecisionEngine
+DecisionEngine --> AlertManager
+AlertManager --> Dashboard
+
+@enduml

@@ -1,0 +1,20 @@
+@startuml
+
+[*] --> NORMAL
+
+NORMAL --> ALERTA : consumo elevado
+NORMAL --> ECONOMIA : baixa geração
+NORMAL --> CRITICO : falha estrutural
+
+ALERTA --> NORMAL : estabilização
+ALERTA --> ECONOMIA : risco energético
+ALERTA --> CRITICO : agravamento
+
+ECONOMIA --> NORMAL : recuperação energética
+ECONOMIA --> CRITICO : energia insuficiente
+
+CRITICO --> RECUPERACAO : contenção executada
+RECUPERACAO --> NORMAL : estabilidade restaurada
+RECUPERACAO --> ALERTA : risco persistente
+
+@enduml

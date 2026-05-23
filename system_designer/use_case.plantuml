@@ -1,0 +1,53 @@
+@startuml
+left to right direction
+
+actor "Operador da Colônia" as Operador
+actor "Administrador do Sistema" as Admin
+actor "Sensores Inteligentes" as Sensores
+actor "Subsistema Energético" as Energia
+actor "Sistema de Alertas" as Alertas
+
+rectangle "Sistema Inteligente Aurora Siger" {
+
+    usecase "Monitorar Sensores" as UC1
+    usecase "Coletar Dados" as UC2
+    usecase "Validar Dados" as UC3
+    usecase "Armazenar Telemetria" as UC4
+    usecase "Processar Dados" as UC5
+    usecase "Executar Regressão Linear" as UC6
+    usecase "Analisar Risco" as UC7
+    usecase "Gerar Alertas" as UC8
+    usecase "Priorizar Subsistemas" as UC9
+    usecase "Executar Automação" as UC10
+    usecase "Visualizar Painel Operacional" as UC11
+    usecase "Consultar Histórico" as UC12
+    usecase "Gerenciar Estados Operacionais" as UC13
+    usecase "Executar Simulações" as UC14
+}
+
+Sensores --> UC1
+Sensores --> UC2
+
+Energia --> UC5
+Energia --> UC6
+
+Operador --> UC11
+Operador --> UC12
+Operador --> UC14
+
+Admin --> UC13
+Admin --> UC9
+
+UC1 --> UC2
+UC2 --> UC3
+UC3 --> UC4
+UC4 --> UC5
+UC5 --> UC6
+UC6 --> UC7
+UC7 --> UC8
+UC7 --> UC9
+UC9 --> UC10
+
+Alertas --> UC8
+
+@enduml
