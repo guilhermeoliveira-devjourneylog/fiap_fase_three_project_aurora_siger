@@ -131,15 +131,39 @@ def status():
 
     sensores = aurora.executar_ciclo()
 
+    solar = 0
+    eolica = 0
+    consumo = 0
+
+    for s in sensores:
+
+        if s["tipo"] == "geracao_solar":
+            solar = s["valor"]
+
+        if s["tipo"] == "geracao_eolica":
+            eolica = s["valor"]
+
+        if s["tipo"] == "consumo_energetico":
+            consumo = s["valor"]
+
     return jsonify({
 
-        "timestamp": datetime.now().strftime("%H:%M:%S"),
+        "timestamp":
+            datetime.now().strftime("%H:%M:%S"),
 
         "sensores": sensores,
 
-        "alertas": len(aurora.alert_manager.alertas),
+        "solar": solar,
 
-        "registros": len(aurora.storage_manager.historico)
+        "eolica": eolica,
+
+        "consumo": consumo,
+
+        "alertas":
+            len(aurora.alert_manager.alertas),
+
+        "registros":
+            len(aurora.storage_manager.historico)
     })
 
 # =========================================================
