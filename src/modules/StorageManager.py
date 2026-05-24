@@ -4,6 +4,69 @@ from typing import Dict, List, Optional
 import hashlib
 import numpy as np
 
+# =========================================================
+# RICH TERMINAL UI
+# =========================================================
+
+from rich.console import Console
+from rich.table import Table
+from rich.panel import Panel
+from rich.tree import Tree
+from rich.rule import Rule
+from rich import box
+
+console = Console()
+
+# =========================================================
+# UI HELPERS
+# =========================================================
+
+class UI:
+
+    @staticmethod
+    def titulo(texto):
+
+        console.print()
+
+        console.print(
+            Panel.fit(
+                f"[bold cyan]{texto}[/bold cyan]",
+                border_style="bright_blue",
+                padding=(1, 5)
+            )
+        )
+
+    @staticmethod
+    def secao(texto):
+
+        console.print(
+            Rule(
+                f"[bold yellow]{texto}[/bold yellow]",
+                style="yellow"
+            )
+        )
+
+    @staticmethod
+    def sucesso(texto):
+
+        console.print(
+            f"[bold green]✔ {texto}[/bold green]"
+        )
+
+    @staticmethod
+    def alerta(texto):
+
+        console.print(
+            f"[bold red]⚠ {texto}[/bold red]"
+        )
+
+    @staticmethod
+    def info(texto):
+
+        console.print(
+            f"[bold blue]ℹ {texto}[/bold blue]"
+        )
+
 
 # =========================================================
 # MODELOS
@@ -11,14 +74,18 @@ import numpy as np
 
 @dataclass
 class Telemetria:
+
     sensor_id: str
+
     tipo: str
+
     valor: float
+
     timestamp: datetime
 
 
 # =========================================================
-# NÓ DA ÁRVORE HIERÁRQUICA
+# NÓ DA ÁRVORE
 # =========================================================
 
 class TreeNode:
@@ -26,18 +93,15 @@ class TreeNode:
     def __init__(self, nome: str):
 
         self.nome = nome
+
         self.filhos: List["TreeNode"] = []
 
-    def adicionar_filho(self, node: "TreeNode"):
+    def adicionar_filho(
+        self,
+        node: "TreeNode"
+    ):
 
         self.filhos.append(node)
-
-    def exibir(self, nivel=0):
-
-        print("   " * nivel + f"- {self.nome}")
-
-        for filho in self.filhos:
-            filho.exibir(nivel + 1)
 
 
 # =========================================================
@@ -46,76 +110,106 @@ class TreeNode:
 
 class StorageManager:
     """
-    Camada responsável pelo armazenamento e organização
-    das informações da colônia Aurora.
-
-    Estruturas utilizadas:
-    - listas;
-    - vetores;
-    - matrizes;
-    - tabelas hash;
-    - árvores hierárquicas.
+    Camada responsável pelo armazenamento
+    e organização dos dados da colônia Aurora.
     """
 
     def __init__(self):
 
         # ==============================================
-        # LISTAS
-        # Histórico linear de telemetria
+        # HISTÓRICO
         # ==============================================
+
         self.historico: List[Telemetria] = []
 
         # ==============================================
         # VETORES
-        # Vetores NumPy para cálculos rápidos
         # ==============================================
+
         self.buffer_temperaturas = np.array([])
 
         # ==============================================
-        # MATRIZES
-        # Matriz de consumo energético
-        # Linhas = módulos
-        # Colunas = intervalos temporais
+        # MATRIZ
         # ==============================================
+
         self.matriz_energia = np.zeros((5, 24))
 
         # ==============================================
         # HASH TABLE
-        # Indexação rápida por sensor_id
         # ==============================================
-        self.hash_telemetria: Dict[str, List[Telemetria]] = {}
+
+        self.hash_telemetria: Dict[
+            str,
+            List[Telemetria]
+        ] = {}
 
         # ==============================================
-        # ÁRVORE HIERÁRQUICA
-        # Organização estrutural da colônia
+        # ÁRVORE
         # ==============================================
-        self.arvore_colonia = TreeNode("Aurora")
+
+        self.arvore_colonia = TreeNode(
+            "Aurora"
+        )
 
         self._inicializar_arvore()
 
+        UI.titulo(
+            "STORAGE MANAGER ONLINE"
+        )
+
     # =====================================================
-    # INICIALIZAÇÃO DA ÁRVORE
+    # ÁRVORE
     # =====================================================
 
     def _inicializar_arvore(self):
 
         energia = TreeNode("Energia")
+
         sensores = TreeNode("Sensores")
-        infraestrutura = TreeNode("Infraestrutura")
 
-        energia.adicionar_filho(TreeNode("Solar"))
-        energia.adicionar_filho(TreeNode("Eólica"))
-        energia.adicionar_filho(TreeNode("Consumo"))
+        infraestrutura = TreeNode(
+            "Infraestrutura"
+        )
 
-        sensores.adicionar_filho(TreeNode("Temperatura"))
-        sensores.adicionar_filho(TreeNode("Vento"))
+        energia.adicionar_filho(
+            TreeNode("Solar")
+        )
 
-        infraestrutura.adicionar_filho(TreeNode("Módulos"))
-        infraestrutura.adicionar_filho(TreeNode("Integridade"))
+        energia.adicionar_filho(
+            TreeNode("Eólica")
+        )
 
-        self.arvore_colonia.adicionar_filho(energia)
-        self.arvore_colonia.adicionar_filho(sensores)
-        self.arvore_colonia.adicionar_filho(infraestrutura)
+        energia.adicionar_filho(
+            TreeNode("Consumo")
+        )
+
+        sensores.adicionar_filho(
+            TreeNode("Temperatura")
+        )
+
+        sensores.adicionar_filho(
+            TreeNode("Vento")
+        )
+
+        infraestrutura.adicionar_filho(
+            TreeNode("Módulos")
+        )
+
+        infraestrutura.adicionar_filho(
+            TreeNode("Integridade")
+        )
+
+        self.arvore_colonia.adicionar_filho(
+            energia
+        )
+
+        self.arvore_colonia.adicionar_filho(
+            sensores
+        )
+
+        self.arvore_colonia.adicionar_filho(
+            infraestrutura
+        )
 
     # =====================================================
     # ARMAZENAMENTO
@@ -129,39 +223,90 @@ class StorageManager:
     ):
 
         registro = Telemetria(
+
             sensor_id=sensor_id,
+
             tipo=tipo,
+
             valor=valor,
+
             timestamp=datetime.now()
         )
 
-        # ==========================================
+        # ==============================================
         # LISTA
-        # ==========================================
-        self.historico.append(registro)
+        # ==============================================
 
-        # ==========================================
+        self.historico.append(
+            registro
+        )
+
+        # ==============================================
         # HASH TABLE
-        # ==========================================
+        # ==============================================
+
         if sensor_id not in self.hash_telemetria:
-            self.hash_telemetria[sensor_id] = []
 
-        self.hash_telemetria[sensor_id].append(registro)
+            self.hash_telemetria[
+                sensor_id
+            ] = []
 
-        # ==========================================
-        # VETOR
-        # ==========================================
+        self.hash_telemetria[
+            sensor_id
+        ].append(registro)
+
+        # ==============================================
+        # BUFFER
+        # ==============================================
+
         if "temperatura" in tipo.lower():
 
             self.buffer_temperaturas = np.append(
+
                 self.buffer_temperaturas,
+
                 valor
             )
 
-        print(
-            f"[ARMAZENADO] "
-            f"{sensor_id} -> {valor}"
+        # ==============================================
+        # OUTPUT VISUAL
+        # ==============================================
+
+        tabela = Table(
+            title="Registro Armazenado",
+            box=box.ROUNDED
         )
+
+        tabela.add_column(
+            "Sensor",
+            style="cyan"
+        )
+
+        tabela.add_column(
+            "Tipo",
+            style="yellow"
+        )
+
+        tabela.add_column(
+            "Valor",
+            style="green"
+        )
+
+        tabela.add_column(
+            "Horário",
+            style="magenta"
+        )
+
+        tabela.add_row(
+            sensor_id,
+            tipo,
+            f"{valor:.2f}",
+            registro.timestamp.strftime(
+                "%H:%M:%S"
+            )
+        )
+
+        console.print(tabela)
 
     # =====================================================
     # CONSULTA
@@ -172,21 +317,77 @@ class StorageManager:
         sensor_id: Optional[str] = None
     ) -> List[Telemetria]:
 
+        UI.titulo(
+            "CONSULTA DE HISTÓRICO"
+        )
+
         if sensor_id:
 
-            print(
-                f"\n[CONSULTA HASH] "
-                f"{sensor_id}"
+            UI.info(
+                f"Consulta HASH: {sensor_id}"
             )
 
-            return self.hash_telemetria.get(
+            registros = self.hash_telemetria.get(
                 sensor_id,
                 []
             )
 
-        print("\n[CONSULTA GLOBAL]")
+        else:
 
-        return self.historico
+            UI.info(
+                "Consulta Global"
+            )
+
+            registros = self.historico
+
+        if not registros:
+
+            UI.alerta(
+                "Nenhum registro encontrado"
+            )
+
+            return []
+
+        tabela = Table(
+            title="Histórico Telemetria",
+            box=box.DOUBLE_EDGE,
+            show_lines=True
+        )
+
+        tabela.add_column(
+            "Sensor",
+            style="cyan"
+        )
+
+        tabela.add_column(
+            "Tipo",
+            style="yellow"
+        )
+
+        tabela.add_column(
+            "Valor",
+            style="green"
+        )
+
+        tabela.add_column(
+            "Timestamp",
+            style="magenta"
+        )
+
+        for item in registros:
+
+            tabela.add_row(
+                item.sensor_id,
+                item.tipo,
+                f"{item.valor:.2f}",
+                item.timestamp.strftime(
+                    "%d/%m %H:%M:%S"
+                )
+            )
+
+        console.print(tabela)
+
+        return registros
 
     # =====================================================
     # HASH
@@ -194,26 +395,52 @@ class StorageManager:
 
     def atualizar_hash(self):
 
-        print("\n[ATUALIZAÇÃO HASH]\n")
+        UI.titulo(
+            "VERIFICAÇÃO DE INTEGRIDADE HASH"
+        )
 
-        for sensor_id, registros in self.hash_telemetria.items():
+        tabela = Table(
+            title="SHA-256",
+            box=box.HEAVY,
+            show_lines=True
+        )
+
+        tabela.add_column(
+            "Sensor",
+            style="cyan"
+        )
+
+        tabela.add_column(
+            "Hash",
+            style="green"
+        )
+
+        for sensor_id, registros in (
+            self.hash_telemetria.items()
+        ):
 
             conteudo = "".join(
+
                 f"{r.valor}{r.timestamp}"
+
                 for r in registros
             )
 
             hash_integridade = hashlib.sha256(
+
                 conteudo.encode()
+
             ).hexdigest()
 
-            print(
-                f"Sensor: {sensor_id}\n"
-                f"Hash: {hash_integridade}\n"
+            tabela.add_row(
+                sensor_id,
+                hash_integridade[:32] + "..."
             )
 
+        console.print(tabela)
+
     # =====================================================
-    # MATRIZ ENERGÉTICA
+    # MATRIZ
     # =====================================================
 
     def atualizar_matriz_energia(
@@ -223,29 +450,97 @@ class StorageManager:
         consumo: float
     ):
 
-        self.matriz_energia[modulo][hora] = consumo
+        self.matriz_energia[
+            modulo
+        ][hora] = consumo
+
+        UI.sucesso(
+            f"Matriz atualizada "
+            f"(Módulo={modulo}, "
+            f"Hora={hora}, "
+            f"Consumo={consumo:.2f})"
+        )
 
     def exibir_matriz_energia(self):
 
-        print("\n[MATRIZ ENERGÉTICA]\n")
+        UI.titulo(
+            "MATRIZ ENERGÉTICA"
+        )
 
-        print(self.matriz_energia)
+        tabela = Table(
+            title="Consumo Energético",
+            box=box.SQUARE
+        )
+
+        tabela.add_column(
+            "Módulo",
+            style="cyan"
+        )
+
+        for hora in range(24):
+
+            tabela.add_column(
+                str(hora),
+                justify="center"
+            )
+
+        for i, linha in enumerate(
+            self.matriz_energia
+        ):
+
+            tabela.add_row(
+
+                f"M-{i}",
+
+                *[
+                    (
+                        f"[green]{v:.0f}[/green]"
+                        if v > 0
+                        else "-"
+                    )
+
+                    for v in linha
+                ]
+            )
+
+        console.print(tabela)
 
     # =====================================================
-    # VETORES
+    # TEMPERATURAS
     # =====================================================
 
     def calcular_media_temperaturas(self):
 
+        UI.titulo(
+            "ANÁLISE TÉRMICA"
+        )
+
         if len(self.buffer_temperaturas) == 0:
+
+            UI.alerta(
+                "Sem temperaturas registradas"
+            )
+
             return 0
 
-        media = np.mean(self.buffer_temperaturas)
-
-        print(
-            f"\n[MÉDIA TEMPERATURAS] "
-            f"{media:.2f}"
+        media = np.mean(
+            self.buffer_temperaturas
         )
+
+        painel = Panel.fit(
+
+            f"[bold green]"
+            f"{media:.2f} °C"
+            f"[/bold green]",
+
+            title="Temperatura Média",
+
+            border_style="green",
+
+            padding=(1, 5)
+        )
+
+        console.print(painel)
 
         return media
 
@@ -255,20 +550,72 @@ class StorageManager:
 
     def exibir_hierarquia(self):
 
-        print("\n[ÁRVORE HIERÁRQUICA]\n")
+        UI.titulo(
+            "HIERARQUIA DA COLÔNIA"
+        )
 
-        self.arvore_colonia.exibir()
+        arvore = Tree(
+            "[bold cyan]Aurora[/bold cyan]"
+        )
+
+        energia = arvore.add(
+            "[yellow]Energia[/yellow]"
+        )
+
+        energia.add(
+            "[green]Solar[/green]"
+        )
+
+        energia.add(
+            "[green]Eólica[/green]"
+        )
+
+        energia.add(
+            "[green]Consumo[/green]"
+        )
+
+        sensores = arvore.add(
+            "[yellow]Sensores[/yellow]"
+        )
+
+        sensores.add(
+            "[green]Temperatura[/green]"
+        )
+
+        sensores.add(
+            "[green]Vento[/green]"
+        )
+
+        infraestrutura = arvore.add(
+            "[yellow]Infraestrutura[/yellow]"
+        )
+
+        infraestrutura.add(
+            "[green]Módulos[/green]"
+        )
+
+        infraestrutura.add(
+            "[green]Integridade[/green]"
+        )
+
+        console.print(arvore)
 
 
 # =========================================================
 # EXEMPLO DE UTILIZAÇÃO
 # =========================================================
 
+console.clear()
+
+UI.titulo(
+    "AURORA SIGER • STORAGE MANAGER"
+)
+
 storage = StorageManager()
 
-# ==============================================
+# =========================================================
 # ARMAZENAMENTO
-# ==============================================
+# =========================================================
 
 storage.armazenar_telemetria(
     "TEMP-INT-01",
@@ -288,26 +635,23 @@ storage.armazenar_telemetria(
     720.8
 )
 
-# ==============================================
+# =========================================================
 # CONSULTA
-# ==============================================
+# =========================================================
 
-dados = storage.consultar_historico(
+storage.consultar_historico(
     "TEMP-INT-01"
 )
 
-for item in dados:
-    print(item)
-
-# ==============================================
+# =========================================================
 # HASH
-# ==============================================
+# =========================================================
 
 storage.atualizar_hash()
 
-# ==============================================
+# =========================================================
 # MATRIZ
-# ==============================================
+# =========================================================
 
 storage.atualizar_matriz_energia(
     modulo=0,
@@ -317,14 +661,30 @@ storage.atualizar_matriz_energia(
 
 storage.exibir_matriz_energia()
 
-# ==============================================
-# VETORES
-# ==============================================
+# =========================================================
+# MÉDIA
+# =========================================================
 
 storage.calcular_media_temperaturas()
 
-# ==============================================
-# ÁRVORE
-# ==============================================
+# =========================================================
+# HIERARQUIA
+# =========================================================
 
 storage.exibir_hierarquia()
+
+# =========================================================
+# FINALIZAÇÃO
+# =========================================================
+
+console.print()
+
+console.print(
+    Panel.fit(
+        "[bold cyan]"
+        "STORAGE MANAGER FINALIZADO"
+        "[/bold cyan]",
+        border_style="cyan",
+        padding=(1, 5)
+    )
+)
