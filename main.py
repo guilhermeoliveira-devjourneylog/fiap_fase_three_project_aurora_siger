@@ -16,6 +16,23 @@ from datetime import datetime
 import random
 
 # =========================================================
+# RICH TERMINAL UI
+# =========================================================
+
+from rich.console import Console
+from rich.table import Table
+from rich.panel import Panel
+from rich.align import Align
+from rich.columns import Columns
+from rich.rule import Rule
+from rich.layout import Layout
+from rich.progress import track
+from rich.live import Live
+from rich import box
+
+console = Console()
+
+# =========================================================
 # IMPORTS DAS CAMADAS
 # =========================================================
 
@@ -47,6 +64,76 @@ from src.modules.AlertManager import (
     Severidade
 )
 
+# =========================================================
+# UI HELPERS
+# =========================================================
+
+class UI:
+
+    @staticmethod
+    def titulo(texto):
+
+        console.print()
+
+        console.print(
+            Panel.fit(
+                Align.center(
+                    f"[bold cyan]{texto}[/bold cyan]"
+                ),
+                border_style="bright_blue",
+                padding=(1, 8)
+            )
+        )
+
+    @staticmethod
+    def secao(texto):
+
+        console.print(
+            Rule(
+                f"[bold yellow]{texto}[/bold yellow]",
+                style="yellow"
+            )
+        )
+
+    @staticmethod
+    def sucesso(texto):
+
+        console.print(
+            f"[bold green]✔ {texto}[/bold green]"
+        )
+
+    @staticmethod
+    def alerta(texto):
+
+        console.print(
+            f"[bold red]⚠ {texto}[/bold red]"
+        )
+
+    @staticmethod
+    def info(texto):
+
+        console.print(
+            f"[bold blue]ℹ {texto}[/bold blue]"
+        )
+
+    @staticmethod
+    def painel_status(
+        titulo,
+        valor,
+        cor
+    ):
+
+        return Panel.fit(
+
+            f"[bold {cor}]{valor}[/bold {cor}]",
+
+            title=titulo,
+
+            border_style=cor,
+
+            padding=(1, 3)
+        )
+
 
 # =========================================================
 # SISTEMA CENTRAL
@@ -73,10 +160,14 @@ class AuroraSystem:
         self.alert_manager = AlertManager()
 
         # ==============================================
-        # CONFIGURAÇÃO INICIAL
+        # CONFIGURAÇÃO
         # ==============================================
 
         self._registrar_sensores()
+
+        UI.titulo(
+            "SISTEMA AURORA INICIALIZADO"
+        )
 
     # =====================================================
     # REGISTRO DOS SENSORES
@@ -84,80 +175,203 @@ class AuroraSystem:
 
     def _registrar_sensores(self):
 
-        self.sensor_manager.registrar_sensor(
-            "TEMP-INT-01",
-            TipoSensor.TEMPERATURA_INTERNA,
-            18,
-            32
+        sensores = [
+
+            (
+                "TEMP-INT-01",
+                TipoSensor.TEMPERATURA_INTERNA,
+                18,
+                32
+            ),
+
+            (
+                "TEMP-EXT-01",
+                TipoSensor.TEMPERATURA_EXTERNA,
+                -120,
+                50
+            ),
+
+            (
+                "VENTO-01",
+                TipoSensor.VELOCIDADE_VENTO,
+                0,
+                180
+            ),
+
+            (
+                "SOLAR-01",
+                TipoSensor.GERACAO_SOLAR,
+                0,
+                1200
+            ),
+
+            (
+                "EOLICA-01",
+                TipoSensor.GERACAO_EOLICA,
+                0,
+                900
+            ),
+
+            (
+                "ENERGIA-01",
+                TipoSensor.CONSUMO_ENERGETICO,
+                100,
+                4000
+            ),
+
+            (
+                "ESTRUTURA-01",
+                TipoSensor.INTEGRIDADE_ESTRUTURAL,
+                70,
+                100
+            )
+
+        ]
+
+        tabela = Table(
+            title="Sensores Registrados",
+            box=box.ROUNDED,
+            show_lines=True
         )
 
-        self.sensor_manager.registrar_sensor(
-            "TEMP-EXT-01",
-            TipoSensor.TEMPERATURA_EXTERNA,
-            -120,
-            50
+        tabela.add_column(
+            "Sensor",
+            style="cyan"
         )
 
-        self.sensor_manager.registrar_sensor(
-            "VENTO-01",
-            TipoSensor.VELOCIDADE_VENTO,
-            0,
-            180
+        tabela.add_column(
+            "Tipo",
+            style="magenta"
         )
 
-        self.sensor_manager.registrar_sensor(
-            "SOLAR-01",
-            TipoSensor.GERACAO_SOLAR,
-            0,
-            1200
+        tabela.add_column(
+            "Faixa",
+            style="green"
         )
 
-        self.sensor_manager.registrar_sensor(
-            "EOLICA-01",
-            TipoSensor.GERACAO_EOLICA,
-            0,
-            900
-        )
+        for (
+            sensor_id,
+            tipo,
+            minimo,
+            maximo
+        ) in sensores:
 
-        self.sensor_manager.registrar_sensor(
-            "ENERGIA-01",
-            TipoSensor.CONSUMO_ENERGETICO,
-            100,
-            4000
-        )
+            self.sensor_manager.registrar_sensor(
+                sensor_id,
+                tipo,
+                minimo,
+                maximo
+            )
 
-        self.sensor_manager.registrar_sensor(
-            "ESTRUTURA-01",
-            TipoSensor.INTEGRIDADE_ESTRUTURAL,
-            70,
-            100
-        )
+            tabela.add_row(
+                sensor_id,
+                tipo.value,
+                f"{minimo} → {maximo}"
+            )
+
+        console.print(tabela)
 
     # =====================================================
     # CICLO OPERACIONAL
     # =====================================================
 
-    def executar_ciclo(self):
+    def executar_ciclo(
+        self,
+        numero_ciclo: int
+    ):
 
-        print("\n================================================")
-        print("INICIANDO CICLO OPERACIONAL DA COLÔNIA")
-        print("================================================\n")
+        UI.titulo(
+            f"CICLO OPERACIONAL {numero_ciclo}"
+        )
 
         # ==============================================
-        # 1. COLETA
+        # CABEÇALHO STATUS
         # ==============================================
+
+        paineis = [
+
+            UI.painel_status(
+                "COLÔNIA",
+                "ONLINE",
+                "green"
+            ),
+
+            UI.painel_status(
+                "ENERGIA",
+                "ESTÁVEL",
+                "cyan"
+            ),
+
+            UI.painel_status(
+                "ESTRUTURA",
+                "SEGURA",
+                "yellow"
+            ),
+
+            UI.painel_status(
+                "ALERTAS",
+                str(
+                    len(
+                        self.alert_manager.alertas
+                    )
+                ),
+                "red"
+            )
+
+        ]
+
+        console.print(
+            Columns(paineis)
+        )
+
+        # ==============================================
+        # ETAPA 1
+        # ==============================================
+
+        UI.secao(
+            "1 • COLETA SENSORIAL"
+        )
 
         self.sensor_manager.coletar_dados()
 
         # ==============================================
-        # 2. VALIDAÇÃO
+        # ETAPA 2
         # ==============================================
+
+        UI.secao(
+            "2 • VALIDAÇÃO OPERACIONAL"
+        )
 
         self.sensor_manager.validar_dados()
 
         # ==============================================
-        # 3. ARMAZENAMENTO
+        # ETAPA 3
         # ==============================================
+
+        UI.secao(
+            "3 • ARMAZENAMENTO"
+        )
+
+        tabela_storage = Table(
+            title="Telemetria Armazenada",
+            box=box.SIMPLE_HEAVY
+        )
+
+        tabela_storage.add_column(
+            "Sensor",
+            style="cyan"
+        )
+
+        tabela_storage.add_column(
+            "Tipo",
+            style="yellow"
+        )
+
+        tabela_storage.add_column(
+            "Valor",
+            justify="right",
+            style="green"
+        )
 
         for sensor in self.sensor_manager.sensores.values():
 
@@ -172,9 +386,21 @@ class AuroraSystem:
                 valor=leitura.valor
             )
 
+            tabela_storage.add_row(
+                leitura.sensor_id,
+                leitura.tipo.value,
+                f"{leitura.valor:.2f}"
+            )
+
+        console.print(tabela_storage)
+
         # ==============================================
-        # 4. PROCESSAMENTO
+        # ETAPA 4
         # ==============================================
+
+        UI.secao(
+            "4 • PROCESSAMENTO ANALÍTICO"
+        )
 
         for registro in self.storage_manager.historico:
 
@@ -189,8 +415,12 @@ class AuroraSystem:
         self.processing_engine.atualizar_estados()
 
         # ==============================================
-        # 5. PREDIÇÃO
+        # ETAPA 5
         # ==============================================
+
+        UI.secao(
+            "5 • ANÁLISE PREDITIVA"
+        )
 
         solar = self._obter_valor_sensor(
             "geracao_solar"
@@ -212,20 +442,57 @@ class AuroraSystem:
 
         self.prediction_engine.executar_regressao_linear()
 
-        self.prediction_engine.prever_geracao(
+        previsoes = self.prediction_engine.prever_geracao(
             passos_futuros=3
+        )
+
+        tabela_previsao = Table(
+            title="Projeção Energética",
+            box=box.DOUBLE_EDGE
+        )
+
+        tabela_previsao.add_column(
+            "Horizonte",
+            style="cyan"
+        )
+
+        tabela_previsao.add_column(
+            "Energia Prevista",
+            style="green"
+        )
+
+        for i, valor in enumerate(
+            previsoes,
+            start=1
+        ):
+
+            tabela_previsao.add_row(
+                f"T+{i}",
+                f"{valor:.2f}"
+            )
+
+        console.print(
+            tabela_previsao
         )
 
         self.prediction_engine.simular_cenarios()
 
         # ==============================================
-        # 6. MOTOR DE DECISÃO
+        # ETAPA 6
         # ==============================================
 
+        UI.secao(
+            "6 • MOTOR DE DECISÃO"
+        )
+
         evento_energia = EventoOperacional(
+
             subsistema="energia",
+
             valor=consumo,
+
             limite=3500,
+
             timestamp=datetime.now()
         )
 
@@ -234,9 +501,16 @@ class AuroraSystem:
         )
 
         evento_estrutura = EventoOperacional(
+
             subsistema="estrutura",
-            valor=random.uniform(60, 120),
+
+            valor=random.uniform(
+                60,
+                120
+            ),
+
             limite=100,
+
             timestamp=datetime.now()
         )
 
@@ -247,14 +521,33 @@ class AuroraSystem:
         self.decision_engine.alterar_estado()
 
         # ==============================================
-        # 7. ALERTAS
+        # ETAPA 7
         # ==============================================
+
+        UI.secao(
+            "7 • SISTEMA DE ALERTAS"
+        )
 
         self._processar_alertas()
 
-        print("\n================================================")
-        print("CICLO FINALIZADO")
-        print("================================================\n")
+        # ==============================================
+        # FINALIZAÇÃO
+        # ==============================================
+
+        console.print()
+
+        console.print(
+            Panel.fit(
+
+                "[bold green]"
+                "CICLO OPERACIONAL FINALIZADO"
+                "[/bold green]",
+
+                border_style="green",
+
+                padding=(1, 5)
+            )
+        )
 
     # =====================================================
     # ALERTAS
@@ -262,20 +555,50 @@ class AuroraSystem:
 
     def _processar_alertas(self):
 
+        tabela_alertas = Table(
+            title="Alertas Operacionais",
+            box=box.HEAVY,
+            show_lines=True
+        )
+
+        tabela_alertas.add_column(
+            "Tipo",
+            style="red"
+        )
+
+        tabela_alertas.add_column(
+            "Severidade",
+            style="yellow"
+        )
+
+        tabela_alertas.add_column(
+            "Mensagem",
+            style="white"
+        )
+
         # ==============================================
-        # ALERTAS DOS SENSORES
+        # ALERTAS SENSORIAIS
         # ==============================================
 
         for alerta in self.sensor_manager.alertas:
 
             alerta_obj = self.alert_manager.gerar_alerta(
+
                 tipo=TipoAlerta.OPERACIONAL,
+
                 severidade=Severidade.MEDIA,
+
                 mensagem=alerta
             )
 
             self.alert_manager.notificar_operador(
                 alerta_obj
+            )
+
+            tabela_alertas.add_row(
+                "SENSOR",
+                "MÉDIA",
+                alerta
             )
 
         # ==============================================
@@ -285,21 +608,35 @@ class AuroraSystem:
         for alerta in self.decision_engine.alertas:
 
             severidade = (
+
                 Severidade.CRITICA
+
                 if "CRÍTICO" in alerta
                 or "EMERGÊNCIA" in alerta
+
                 else Severidade.ALTA
             )
 
             alerta_obj = self.alert_manager.gerar_alerta(
+
                 tipo=TipoAlerta.CRITICO,
+
                 severidade=severidade,
+
                 mensagem=alerta
             )
 
             self.alert_manager.notificar_operador(
                 alerta_obj
             )
+
+            tabela_alertas.add_row(
+                "DECISION",
+                severidade.value,
+                alerta
+            )
+
+        console.print(tabela_alertas)
 
     # =====================================================
     # AUXILIAR
@@ -326,13 +663,63 @@ class AuroraSystem:
 
     def exibir_dashboard(self):
 
-        print("\n================================================")
-        print("DASHBOARD DA COLÔNIA AURORA")
-        print("================================================\n")
+        UI.titulo(
+            "DASHBOARD CENTRAL DA COLÔNIA"
+        )
 
         # ==============================================
-        # SENSORES
+        # PAINÉIS PRINCIPAIS
         # ==============================================
+
+        dashboard = Columns([
+
+            UI.painel_status(
+                "SENSORES",
+                str(
+                    len(
+                        self.sensor_manager.sensores
+                    )
+                ),
+                "cyan"
+            ),
+
+            UI.painel_status(
+                "REGISTROS",
+                str(
+                    len(
+                        self.storage_manager.historico
+                    )
+                ),
+                "green"
+            ),
+
+            UI.painel_status(
+                "ALERTAS",
+                str(
+                    len(
+                        self.alert_manager.alertas
+                    )
+                ),
+                "red"
+            ),
+
+            UI.painel_status(
+                "STATUS",
+                "OPERACIONAL",
+                "yellow"
+            )
+
+        ])
+
+        console.print(dashboard)
+
+        # ==============================================
+        # MONITORAMENTO
+        # ==============================================
+
+        UI.secao(
+            "MONITORAMENTO DE SENSORES"
+        )
 
         self.sensor_manager.monitorar_integridade()
 
@@ -340,11 +727,19 @@ class AuroraSystem:
         # MATRIZ ENERGÉTICA
         # ==============================================
 
+        UI.secao(
+            "MATRIZ ENERGÉTICA"
+        )
+
         self.storage_manager.exibir_matriz_energia()
 
         # ==============================================
         # ALERTAS
         # ==============================================
+
+        UI.secao(
+            "CENTRAL DE ALERTAS"
+        )
 
         self.alert_manager.exibir_dashboard()
 
@@ -352,9 +747,28 @@ class AuroraSystem:
         # ESTATÍSTICAS
         # ==============================================
 
+        UI.secao(
+            "ESTATÍSTICAS GLOBAIS"
+        )
+
         self.processing_engine.processar_estatisticas()
 
         self.prediction_engine.exibir_estatisticas()
+
+        console.print()
+
+        console.print(
+            Panel.fit(
+
+                "[bold bright_green]"
+                "DASHBOARD FINALIZADO"
+                "[/bold bright_green]",
+
+                border_style="bright_green",
+
+                padding=(1, 6)
+            )
+        )
 
 
 # =========================================================
@@ -362,6 +776,12 @@ class AuroraSystem:
 # =========================================================
 
 if __name__ == "__main__":
+
+    console.clear()
+
+    UI.titulo(
+        "AURORA SIGER"
+    )
 
     sistema = AuroraSystem()
 
@@ -371,9 +791,9 @@ if __name__ == "__main__":
 
     for i in range(3):
 
-        print(f"\n########## CICLO {i+1} ##########\n")
-
-        sistema.executar_ciclo()
+        sistema.executar_ciclo(
+            numero_ciclo=i + 1
+        )
 
     # ==============================================
     # DASHBOARD FINAL
@@ -382,7 +802,21 @@ if __name__ == "__main__":
     sistema.exibir_dashboard()
 
     # ==============================================
-    # MANTÉM TERMINAL ABERTO
+    # FINALIZAÇÃO
     # ==============================================
 
-    input("\nPressione ENTER para encerrar o sistema Aurora...")
+    console.print()
+
+    console.print(
+        Panel.fit(
+
+            "[bold cyan]"
+            "Pressione ENTER para encerrar "
+            "o Sistema Aurora"
+            "[/bold cyan]",
+
+            border_style="cyan"
+        )
+    )
+
+    input()
