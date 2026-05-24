@@ -1,14 +1,33 @@
-body {
+/* =========================================================
+   RESET
+========================================================= */
+
+* {
 
     margin: 0;
     padding: 0;
+
+    box-sizing: border-box;
+}
+
+
+/* =========================================================
+   BODY
+========================================================= */
+
+body {
 
     background: #0d1117;
 
     color: white;
 
-    font-family: Arial;
+    font-family: Arial, Helvetica, sans-serif;
 }
+
+
+/* =========================================================
+   HEADER
+========================================================= */
 
 header {
 
@@ -17,11 +36,35 @@ header {
     text-align: center;
 
     background: #161b22;
+
+    border-bottom: 1px solid #30363d;
 }
+
+header h1 {
+
+    font-size: 42px;
+
+    margin-bottom: 10px;
+
+    color: #58a6ff;
+}
+
+header p {
+
+    color: #8b949e;
+}
+
+
+/* =========================================================
+   CARDS
+========================================================= */
 
 .cards {
 
-    display: flex;
+    display: grid;
+
+    grid-template-columns:
+        repeat(auto-fit, minmax(220px, 1fr));
 
     gap: 20px;
 
@@ -30,34 +73,79 @@ header {
 
 .card {
 
-    flex: 1;
-
     background: #161b22;
 
-    padding: 20px;
+    padding: 25px;
 
-    border-radius: 12px;
+    border-radius: 16px;
 
     text-align: center;
 
-    box-shadow: 0 0 15px rgba(0,0,0,0.5);
+    border: 1px solid #30363d;
+
+    transition: 0.3s;
+}
+
+.card:hover {
+
+    transform: translateY(-3px);
+
+    border-color: #58a6ff;
+}
+
+.card h2 {
+
+    margin-bottom: 15px;
+
+    color: #8b949e;
 }
 
 .card span {
 
-    font-size: 32px;
+    font-size: 34px;
 
     font-weight: bold;
 }
 
-.online {
 
-    color: #00ff88;
+/* =========================================================
+   STATUS
+========================================================= */
+
+.online,
+.status-online {
+
+    color: #00c853;
 }
+
+.status-alerta {
+
+    color: #ffd600;
+}
+
+.status-critico {
+
+    color: #ff5252;
+}
+
+.status-offline {
+
+    color: #9e9e9e;
+}
+
+
+/* =========================================================
+   PAINEL TABELA
+========================================================= */
 
 .painel {
 
     padding: 20px;
+}
+
+.painel h2 {
+
+    margin-bottom: 20px;
 }
 
 table {
@@ -67,16 +155,235 @@ table {
     border-collapse: collapse;
 
     background: #161b22;
-}
 
-th, td {
+    border-radius: 14px;
 
-    padding: 15px;
+    overflow: hidden;
 
-    border-bottom: 1px solid #30363d;
+    border: 1px solid #30363d;
 }
 
 th {
 
     background: #21262d;
+
+    color: #58a6ff;
+
+    padding: 16px;
+}
+
+td {
+
+    padding: 16px;
+
+    border-top: 1px solid #30363d;
+}
+
+tr:hover {
+
+    background: rgba(255,255,255,0.03);
+}
+
+
+/* =========================================================
+   GRÁFICOS
+========================================================= */
+
+.grafico-container {
+
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 20px;
+
+    padding: 20px;
+}
+
+
+/* =========================================================
+   CARD DOS GRÁFICOS
+========================================================= */
+
+.grafico-card {
+
+    background: #161b22;
+
+    border-radius: 16px;
+
+    padding: 20px;
+
+    border: 1px solid #30363d;
+
+    min-height: 500px;
+
+    display: flex;
+
+    flex-direction: column;
+}
+
+.grafico-card h2 {
+
+    margin-bottom: 20px;
+
+    color: #58a6ff;
+}
+
+
+/* =========================================================
+   CHART
+========================================================= */
+
+canvas {
+
+    width: 100% !important;
+
+    height: 420px !important;
+}
+
+
+/* =========================================================
+   HEATMAP
+========================================================= */
+
+#heatmap {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(auto-fit, minmax(140px, 1fr));
+
+    gap: 15px;
+
+    width: 100%;
+
+    margin-top: 10px;
+}
+
+
+/* =========================================================
+   CÉLULAS HEATMAP
+========================================================= */
+
+.heat-cell {
+
+    min-height: 120px;
+
+    border-radius: 14px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    text-align: center;
+
+    padding: 15px;
+
+    transition: 0.3s;
+
+    border: 2px solid rgba(255,255,255,0.08);
+
+    box-shadow:
+        0 0 12px rgba(0,0,0,0.4);
+}
+
+
+/* =========================================================
+   HOVER
+========================================================= */
+
+.heat-cell:hover {
+
+    transform: scale(1.03);
+
+    border-color: rgba(255,255,255,0.4);
+}
+
+
+/* =========================================================
+   CONTEÚDO
+========================================================= */
+
+.heat-content {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 10px;
+}
+
+.heat-content strong {
+
+    font-size: 14px;
+
+    color: white;
+}
+
+.heat-content span {
+
+    font-size: 24px;
+
+    font-weight: bold;
+}
+
+
+/* =========================================================
+   VALORES
+========================================================= */
+
+.valor-normal {
+
+    color: #00c853;
+}
+
+.valor-alerta {
+
+    color: #ffd600;
+}
+
+.valor-critico {
+
+    color: #ff5252;
+
+    font-weight: bold;
+}
+
+
+/* =========================================================
+   RESPONSIVIDADE
+========================================================= */
+
+@media (max-width: 1200px) {
+
+    .grafico-container {
+
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+
+    header h1 {
+
+        font-size: 28px;
+    }
+
+    .cards {
+
+        grid-template-columns: 1fr;
+    }
+
+    #heatmap {
+
+        grid-template-columns:
+            repeat(auto-fit, minmax(120px, 1fr));
+    }
+
+    canvas {
+
+        height: 300px !important;
+    }
 }
