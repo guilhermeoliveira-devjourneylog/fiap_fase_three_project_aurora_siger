@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <title>Aurora SIGER</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
+
+</head>
+
+<body>
+
+    <header>
+
+        <h1>AURORA SIGER</h1>
+
+        <p>
+            Sistema Inteligente de Gestão Energética
+        </p>
+
+    </header>
+
+    <section class="cards">
+
+        <div class="card">
+            <h2>Registros</h2>
+            <span id="registros">0</span>
+        </div>
+
+        <div class="card">
+            <h2>Alertas</h2>
+            <span id="alertas">0</span>
+        </div>
+
+        <div class="card">
+            <h2>Status</h2>
+            <span class="online">
+                ONLINE
+            </span>
+        </div>
+
+    </section>
+
+    <section class="painel">
+
+        <h2>Sensores</h2>
+
+        <table>
+
+            <thead>
+
+                <tr>
+                    <th>Sensor</th>
+                    <th>Tipo</th>
+                    <th>Valor</th>
+                </tr>
+
+            </thead>
+
+            <tbody id="sensores-body">
+
+            </tbody>
+
+        </table>
+
+    </section>
+
+    <script
+        src="{{ url_for('static', filename='js/dashboard.js') }}"
+    ></script>
+
+</body>
+
+</html>
