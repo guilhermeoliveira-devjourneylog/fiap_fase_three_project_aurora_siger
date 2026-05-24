@@ -71,6 +71,30 @@
 
     </section>
 
+    <section class="grafico-container">
+
+        <div class="grafico-card">
+
+            <h2>Consumo Energético</h2>
+
+            <canvas id="energiaChart"></canvas>
+
+        </div>
+
+        <div class="grafico-card">
+
+            <h2>Heatmap Energético</h2>
+
+            <div id="heatmap">
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <script
         src="{{ url_for('static', filename='js/dashboard.js') }}"
     ></script>
