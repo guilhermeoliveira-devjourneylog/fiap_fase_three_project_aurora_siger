@@ -630,10 +630,17 @@ class AuroraSystem:
                 alerta_obj
             )
 
+            cor_severidade = {
+                Severidade.BAIXA: "green",
+                Severidade.MEDIA: "yellow",
+                Severidade.ALTA: "orange3",
+                Severidade.CRITICA: "red"
+            }    
+            
             tabela_alertas.add_row(
                 "DECISION",
-                severidade.value,
-                alerta
+                f"[bold {cor_severidade[severidade]}]{severidade.name}[/]",
+                str(alerta)
             )
 
         console.print(tabela_alertas)
