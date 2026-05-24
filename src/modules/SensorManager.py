@@ -4,6 +4,73 @@ from enum import Enum
 from typing import Dict, List, Optional
 import random
 
+# =========================================================
+# RICH TERMINAL UI
+# =========================================================
+
+from rich.console import Console
+from rich.table import Table
+from rich.panel import Panel
+from rich.align import Align
+from rich.rule import Rule
+from rich.text import Text
+from rich.columns import Columns
+from rich import box
+
+console = Console()
+
+# =========================================================
+# UI HELPERS
+# =========================================================
+
+class UI:
+
+    @staticmethod
+    def titulo(texto):
+
+        console.print()
+
+        console.print(
+            Panel.fit(
+                Align.center(
+                    f"[bold cyan]{texto}[/bold cyan]"
+                ),
+                border_style="cyan",
+                padding=(1, 5)
+            )
+        )
+
+    @staticmethod
+    def secao(texto):
+
+        console.print(
+            Rule(
+                f"[bold yellow]{texto}[/bold yellow]",
+                style="yellow"
+            )
+        )
+
+    @staticmethod
+    def sucesso(texto):
+
+        console.print(
+            f"[bold green]✔ {texto}[/bold green]"
+        )
+
+    @staticmethod
+    def alerta(texto):
+
+        console.print(
+            f"[bold red]⚠ {texto}[/bold red]"
+        )
+
+    @staticmethod
+    def info(texto):
+
+        console.print(
+            f"[bold blue]ℹ {texto}[/bold blue]"
+        )
+
 
 # =========================================================
 # ENUMS
@@ -28,7 +95,7 @@ class TipoSensor(Enum):
 
 
 # =========================================================
-# MODELO DE DADOS
+# MODELO
 # =========================================================
 
 @dataclass
@@ -59,27 +126,50 @@ class Sensor:
         self.limite_max = limite_max
 
         self.status = StatusSensor.ONLINE
-        self.ultima_leitura: Optional[LeituraSensor] = None
+
+        self.ultima_leitura: Optional[
+            LeituraSensor
+        ] = None
+
+    # =====================================================
+    # LEITURA
+    # =====================================================
 
     def gerar_leitura(self) -> float:
-        """
-        Simulação de leitura baseada no tipo de sensor.
-        """
 
         faixa = {
-            TipoSensor.TEMPERATURA_INTERNA: (18, 32),
-            TipoSensor.TEMPERATURA_EXTERNA: (-80, 40),
-            TipoSensor.VELOCIDADE_VENTO: (0, 180),
-            TipoSensor.GERACAO_SOLAR: (0, 1000),
-            TipoSensor.GERACAO_EOLICA: (0, 700),
-            TipoSensor.CONSUMO_ENERGETICO: (50, 1200),
-            TipoSensor.ESTADO_MODULOS: (0, 100),
-            TipoSensor.INTEGRIDADE_ESTRUTURAL: (0, 100)
+
+            TipoSensor.TEMPERATURA_INTERNA:
+                (18, 32),
+
+            TipoSensor.TEMPERATURA_EXTERNA:
+                (-80, 40),
+
+            TipoSensor.VELOCIDADE_VENTO:
+                (0, 180),
+
+            TipoSensor.GERACAO_SOLAR:
+                (0, 1000),
+
+            TipoSensor.GERACAO_EOLICA:
+                (0, 700),
+
+            TipoSensor.CONSUMO_ENERGETICO:
+                (50, 1200),
+
+            TipoSensor.ESTADO_MODULOS:
+                (0, 100),
+
+            TipoSensor.INTEGRIDADE_ESTRUTURAL:
+                (0, 100)
         }
 
         minimo, maximo = faixa[self.tipo]
 
-        return round(random.uniform(minimo, maximo), 2)
+        return round(
+            random.uniform(minimo, maximo),
+            2
+        )
 
 
 # =========================================================
@@ -90,9 +180,20 @@ class SensorManager:
 
     def __init__(self):
 
-        self.sensores: Dict[str, Sensor] = {}
-        self.historico: List[LeituraSensor] = []
+        self.sensores: Dict[
+            str,
+            Sensor
+        ] = {}
+
+        self.historico: List[
+            LeituraSensor
+        ] = []
+
         self.alertas: List[str] = []
+
+        UI.titulo(
+            "SENSOR MANAGER INICIALIZADO"
+        )
 
     # =====================================================
     # REGISTRO
@@ -115,7 +216,33 @@ class SensorManager:
 
         self.sensores[sensor_id] = sensor
 
-        print(f"[INFO] Sensor registrado: {sensor_id}")
+        tabela = Table(
+            title="Novo Sensor Registrado",
+            box=box.ROUNDED
+        )
+
+        tabela.add_column(
+            "Sensor",
+            style="cyan"
+        )
+
+        tabela.add_column(
+            "Tipo",
+            style="magenta"
+        )
+
+        tabela.add_column(
+            "Faixa",
+            style="green"
+        )
+
+        tabela.add_row(
+            sensor_id,
+            tipo.value,
+            f"{limite_min} → {limite_max}"
+        )
+
+        console.print(tabela)
 
     # =====================================================
     # COLETA
@@ -123,7 +250,35 @@ class SensorManager:
 
     def coletar_dados(self):
 
-        print("\n[COLETA DE DADOS]\n")
+        UI.titulo(
+            "COLETA DE TELEMETRIA"
+        )
+
+        tabela = Table(
+            title="Leituras dos Sensores",
+            box=box.HEAVY_EDGE,
+            show_lines=True
+        )
+
+        tabela.add_column(
+            "Sensor",
+            style="cyan"
+        )
+
+        tabela.add_column(
+            "Tipo",
+            style="magenta"
+        )
+
+        tabela.add_column(
+            "Valor",
+            justify="right"
+        )
+
+        tabela.add_column(
+            "Timestamp",
+            style="green"
+        )
 
         for sensor in self.sensores.values():
 
@@ -140,11 +295,20 @@ class SensorManager:
 
             self.historico.append(leitura)
 
-            print(
-                f"{sensor.sensor_id} | "
-                f"{sensor.tipo.value} | "
-                f"{valor}"
+            tabela.add_row(
+                sensor.sensor_id,
+                sensor.tipo.value,
+                f"{valor:.2f}",
+                leitura.timestamp.strftime(
+                    "%H:%M:%S"
+                )
             )
+
+        console.print(tabela)
+
+        UI.sucesso(
+            "Coleta concluída"
+        )
 
     # =====================================================
     # VALIDAÇÃO
@@ -152,7 +316,35 @@ class SensorManager:
 
     def validar_dados(self):
 
-        print("\n[VALIDAÇÃO DOS DADOS]\n")
+        UI.titulo(
+            "VALIDAÇÃO OPERACIONAL"
+        )
+
+        tabela = Table(
+            title="Status dos Sensores",
+            box=box.DOUBLE_EDGE,
+            show_lines=True
+        )
+
+        tabela.add_column(
+            "Sensor",
+            style="cyan"
+        )
+
+        tabela.add_column(
+            "Valor",
+            justify="right"
+        )
+
+        tabela.add_column(
+            "Faixa",
+            style="yellow"
+        )
+
+        tabela.add_column(
+            "Status",
+            justify="center"
+        )
 
         for sensor in self.sensores.values():
 
@@ -163,28 +355,52 @@ class SensorManager:
 
             valor = leitura.valor
 
+            faixa = (
+                f"{sensor.limite_min}"
+                f" → "
+                f"{sensor.limite_max}"
+            )
+
+            # =========================================
+            # SENSOR OK
+            # =========================================
+
             if sensor.limite_min <= valor <= sensor.limite_max:
 
                 sensor.status = StatusSensor.ONLINE
 
-                print(
-                    f"[OK] {sensor.sensor_id} "
-                    f"-> {valor}"
+                status = (
+                    "[green]ONLINE[/green]"
                 )
+
+            # =========================================
+            # ALERTA
+            # =========================================
 
             else:
 
                 sensor.status = StatusSensor.ALERTA
 
+                status = (
+                    "[red]ALERTA[/red]"
+                )
+
                 alerta = (
-                    f"[ALERTA] {sensor.sensor_id} "
+                    f"{sensor.sensor_id} "
                     f"fora da faixa operacional "
-                    f"({valor})"
+                    f"({valor:.2f})"
                 )
 
                 self.alertas.append(alerta)
 
-                print(alerta)
+            tabela.add_row(
+                sensor.sensor_id,
+                f"{valor:.2f}",
+                faixa,
+                status
+            )
+
+        console.print(tabela)
 
     # =====================================================
     # MONITORAMENTO
@@ -192,7 +408,11 @@ class SensorManager:
 
     def monitorar_integridade(self):
 
-        print("\n[MONITORAMENTO DA INTEGRIDADE]\n")
+        UI.titulo(
+            "MONITORAMENTO DA INTEGRIDADE"
+        )
+
+        paineis = []
 
         for sensor in self.sensores.values():
 
@@ -202,13 +422,42 @@ class SensorManager:
 
                 sensor.status = StatusSensor.OFFLINE
 
-            print(
-                f"Sensor: {sensor.sensor_id}\n"
-                f"Tipo: {sensor.tipo.value}\n"
-                f"Status: {sensor.status.value}\n"
-                f"Último valor: "
-                f"{leitura.valor if leitura else 'N/A'}\n"
+            cor = "green"
+
+            if sensor.status == StatusSensor.ALERTA:
+                cor = "yellow"
+
+            if sensor.status == StatusSensor.OFFLINE:
+                cor = "red"
+
+            painel = Panel(
+
+                (
+                    f"[bold cyan]{sensor.sensor_id}[/bold cyan]\n\n"
+
+                    f"[white]Tipo:[/white] "
+                    f"{sensor.tipo.value}\n"
+
+                    f"[white]Status:[/white] "
+                    f"[{cor}]"
+                    f"{sensor.status.value}"
+                    f"[/{cor}]\n"
+
+                    f"[white]Último Valor:[/white] "
+                    f"{leitura.valor if leitura else 'N/A'}"
+                ),
+
+                title="Sensor",
+                border_style=cor,
+                width=35
+
             )
+
+            paineis.append(painel)
+
+        console.print(
+            Columns(paineis)
+        )
 
     # =====================================================
     # ALERTAS
@@ -216,23 +465,66 @@ class SensorManager:
 
     def exibir_alertas(self):
 
-        print("\n[ALERTAS DO SISTEMA]\n")
+        UI.titulo(
+            "CENTRAL DE ALERTAS"
+        )
 
         if not self.alertas:
-            print("Nenhum alerta ativo.")
+
+            painel = Panel.fit(
+                "[bold green]"
+                "Nenhum alerta ativo"
+                "[/bold green]",
+                border_style="green"
+            )
+
+            console.print(painel)
+
             return
 
-        for alerta in self.alertas:
-            print(alerta)
+        tabela = Table(
+            title="Alertas Operacionais",
+            box=box.HEAVY,
+            show_lines=True
+        )
+
+        tabela.add_column(
+            "ID",
+            justify="center"
+        )
+
+        tabela.add_column(
+            "Descrição",
+            style="red"
+        )
+
+        for i, alerta in enumerate(
+            self.alertas,
+            start=1
+        ):
+
+            tabela.add_row(
+                str(i),
+                alerta
+            )
+
+        console.print(tabela)
 
 
 # =========================================================
-# INICIALIZAÇÃO DA CAMADA DE SENSORES
+# INICIALIZAÇÃO
 # =========================================================
+
+UI.titulo(
+    "SISTEMA AURORA - CAMADA SENSORIAL"
+)
 
 sensor_manager = SensorManager()
 
-# Temperatura interna
+# =========================================================
+# REGISTROS
+# =========================================================
+
 sensor_manager.registrar_sensor(
     "TEMP-INT-01",
     TipoSensor.TEMPERATURA_INTERNA,
@@ -240,7 +532,6 @@ sensor_manager.registrar_sensor(
     30
 )
 
-# Temperatura externa
 sensor_manager.registrar_sensor(
     "TEMP-EXT-01",
     TipoSensor.TEMPERATURA_EXTERNA,
@@ -248,7 +539,6 @@ sensor_manager.registrar_sensor(
     50
 )
 
-# Velocidade do vento
 sensor_manager.registrar_sensor(
     "VENTO-01",
     TipoSensor.VELOCIDADE_VENTO,
@@ -256,7 +546,6 @@ sensor_manager.registrar_sensor(
     150
 )
 
-# Geração solar
 sensor_manager.registrar_sensor(
     "SOLAR-01",
     TipoSensor.GERACAO_SOLAR,
@@ -264,7 +553,6 @@ sensor_manager.registrar_sensor(
     1000
 )
 
-# Geração eólica
 sensor_manager.registrar_sensor(
     "EOLICA-01",
     TipoSensor.GERACAO_EOLICA,
@@ -272,7 +560,6 @@ sensor_manager.registrar_sensor(
     700
 )
 
-# Consumo energético
 sensor_manager.registrar_sensor(
     "ENERGIA-01",
     TipoSensor.CONSUMO_ENERGETICO,
@@ -280,7 +567,6 @@ sensor_manager.registrar_sensor(
     1000
 )
 
-# Estado dos módulos
 sensor_manager.registrar_sensor(
     "MODULO-01",
     TipoSensor.ESTADO_MODULOS,
@@ -288,7 +574,6 @@ sensor_manager.registrar_sensor(
     100
 )
 
-# Integridade estrutural
 sensor_manager.registrar_sensor(
     "ESTRUTURA-01",
     TipoSensor.INTEGRIDADE_ESTRUTURAL,
@@ -296,7 +581,7 @@ sensor_manager.registrar_sensor(
     100
 )
 
-# =========================================================
+# ========================================================= 
 # EXECUÇÃO
 # =========================================================
 
@@ -307,3 +592,7 @@ sensor_manager.validar_dados()
 sensor_manager.monitorar_integridade()
 
 sensor_manager.exibir_alertas()
+
+UI.titulo(
+    "MONITORAMENTO FINALIZADO"
+)
