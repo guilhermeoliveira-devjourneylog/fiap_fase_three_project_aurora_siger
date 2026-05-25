@@ -1,15 +1,148 @@
 # =========================================================
 # MAIN - SISTEMA AURORA
 # =========================================================
-# Integração completa das camadas:
-#
-# - SensorManager
-# - StorageManager
-# - ProcessingEngine
-# - PredictionEngine
-# - DecisionEngine
-# - AlertManager
-#
+"""
+Sistema central de execução da Colônia Aurora SIGER.
+
+Este módulo representa a camada principal de orquestração
+da arquitetura Aurora, integrando:
+
+- SensorManager;
+- StorageManager;
+- ProcessingEngine;
+- PredictionEngine;
+- DecisionEngine;
+- AlertManager.
+
+=========================================================
+OBJETIVO
+=========================================================
+
+Executar ciclos operacionais inteligentes capazes de:
+
+- coletar dados sensoriais;
+- validar telemetria;
+- armazenar registros históricos;
+- processar estatísticas;
+- executar regressão linear;
+- prever geração energética futura;
+- simular cenários operacionais;
+- automatizar decisões críticas;
+- gerar alertas operacionais;
+- exibir dashboards estratégicos.
+
+=========================================================
+ARQUITETURA OPERACIONAL
+=========================================================
+
+Sensores
+    ↓
+StorageManager
+    ↓
+ProcessingEngine
+    ↓
+PredictionEngine
+    ↓
+DecisionEngine
+    ↓
+AlertManager
+
+=========================================================
+FUNCIONALIDADES PRINCIPAIS
+=========================================================
+
+1. Sensoriamento Inteligente
+----------------------------
+Realiza aquisição contínua de:
+
+- temperatura interna;
+- temperatura externa;
+- velocidade do vento;
+- geração solar;
+- geração eólica;
+- consumo energético;
+- integridade estrutural.
+
+2. Processamento Analítico
+--------------------------
+Executa:
+
+- cálculo estatístico;
+- identificação de padrões;
+- análise operacional;
+- atualização de estados críticos.
+
+3. Inteligência Preditiva
+-------------------------
+Implementa:
+
+- regressão linear;
+- previsão energética;
+- análise de resíduos;
+- simulação de cenários;
+- cálculo de tendência;
+- avaliação de estabilidade do modelo.
+
+4. Motor de Decisão
+-------------------
+Responsável por:
+
+- automação operacional;
+- análise de eventos;
+- acionamento de protocolos;
+- mitigação de riscos.
+
+5. Sistema de Alertas
+---------------------
+Gerencia:
+
+- alertas energéticos;
+- alertas estruturais;
+- alertas operacionais;
+- alertas críticos;
+- notificações da IA preditiva.
+
+=========================================================
+TECNOLOGIAS UTILIZADAS
+=========================================================
+
+- Python 3;
+- NumPy;
+- Rich Terminal UI;
+- Dataclasses;
+- Arquitetura modular orientada a objetos.
+
+=========================================================
+COMPORTAMENTO OPERACIONAL
+=========================================================
+
+O sistema executa ciclos contínuos onde:
+
+1. sensores geram telemetria;
+2. dados são armazenados;
+3. estatísticas são processadas;
+4. modelos preditivos são treinados;
+5. previsões futuras são calculadas;
+6. decisões automatizadas são executadas;
+7. alertas são emitidos;
+8. dashboards são atualizados.
+
+=========================================================
+MODO DE EXECUÇÃO
+=========================================================
+
+Execução padrão:
+
+    python main.py
+
+=========================================================
+AUTOR
+=========================================================
+
+Projeto Aurora SIGER
+Sistema Inteligente de Gerenciamento Energético
+e Operacional para Colônias Autônomas.
+"""
 # =========================================================
 
 from datetime import datetime
