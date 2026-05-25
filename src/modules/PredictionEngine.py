@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from datetime import datetime
-from typing import List
+from typing import List, Optional
+
 import numpy as np
 
 # =========================================================
@@ -13,7 +14,6 @@ from rich.panel import Panel
 from rich.align import Align
 from rich.rule import Rule
 from rich.columns import Columns
-from rich.progress import track
 from rich.text import Text
 from rich import box
 
@@ -73,7 +73,7 @@ class UI:
 
 
 # =========================================================
-# MODELOS
+# MODELO DE DADOS
 # =========================================================
 
 @dataclass
@@ -94,49 +94,60 @@ class RegistroEnergetico:
 
 class PredictionEngine:
     """
-    Camada responsável por:
+    Sistema responsável por:
+
+    - ingestão energética;
     - regressão linear;
-    - previsão de geração;
-    - simulação de cenários;
-    - análise preditiva da colônia Aurora.
+    - previsão operacional;
+    - análise estatística;
+    - análise de resíduos;
+    - simulação de cenários.
     """
 
     def __init__(self):
 
-        # ==============================================
-        # Histórico
-        # ==============================================
+        # =================================================
+        # HISTÓRICO
+        # =================================================
 
         self.historico: List[
             RegistroEnergetico
         ] = []
 
-        # ==============================================
-        # Vetores NumPy
-        # ==============================================
+        # =================================================
+        # LISTAS TEMPORÁRIAS
+        # =================================================
 
-        self.vetor_tempo = np.array([])
+        self.tempos = []
 
-        self.vetor_geracao_solar = np.array([])
+        self.geracao_solar = []
 
-        self.vetor_geracao_eolica = np.array([])
+        self.geracao_eolica = []
 
-        self.vetor_consumo = np.array([])
+        self.consumo = []
 
-        # ==============================================
-        # Regressão Linear
-        # ==============================================
+        # =================================================
+        # MODELO
+        # =================================================
 
         self.coeficiente_angular = 0.0
 
         self.coeficiente_linear = 0.0
+
+        self.r2 = 0.0
+
+        self.residuos = np.array([])
+
+        self.y_pred = np.array([])
+
+        self.modelo_treinado = False
 
         UI.titulo(
             "PREDICTION ENGINE INICIALIZADO"
         )
 
     # =====================================================
-    # REGISTRO
+    # INGESTÃO
     # =====================================================
 
     def adicionar_registro(
@@ -150,13 +161,11 @@ class PredictionEngine:
             "INGESTÃO ENERGÉTICA"
         )
 
-        indice_tempo = len(
-            self.vetor_tempo
-        )
+        timestamp = datetime.now()
 
         registro = RegistroEnergetico(
 
-            timestamp=datetime.now(),
+            timestamp=timestamp,
 
             geracao_solar=geracao_solar,
 
@@ -165,35 +174,48 @@ class PredictionEngine:
             consumo=consumo
         )
 
-        self.historico.append(registro)
-
-        # ==============================================
-        # Vetores
-        # ==============================================
-
-        self.vetor_tempo = np.append(
-            self.vetor_tempo,
-            indice_tempo
+        self.historico.append(
+            registro
         )
 
-        self.vetor_geracao_solar = np.append(
-            self.vetor_geracao_solar,
+        # =================================================
+        # TEMPO RELATIVO EM SEGUNDOS
+        # =================================================
+
+        if len(self.historico) == 1:
+
+            tempo_relativo = 0
+
+        else:
+
+            tempo_relativo = (
+                timestamp
+                - self.historico[0].timestamp
+            ).total_seconds()
+
+        # =================================================
+        # ARMAZENAMENTO
+        # =================================================
+
+        self.tempos.append(
+            tempo_relativo
+        )
+
+        self.geracao_solar.append(
             geracao_solar
         )
 
-        self.vetor_geracao_eolica = np.append(
-            self.vetor_geracao_eolica,
+        self.geracao_eolica.append(
             geracao_eolica
         )
 
-        self.vetor_consumo = np.append(
-            self.vetor_consumo,
+        self.consumo.append(
             consumo
         )
 
-        # ==============================================
+        # =================================================
         # TABELA
-        # ==============================================
+        # =================================================
 
         tabela = Table(
             title="Novo Registro Energético",
@@ -216,7 +238,7 @@ class PredictionEngine:
         )
 
         tabela.add_column(
-            "Timestamp",
+            "Tempo",
             style="green"
         )
 
@@ -224,9 +246,7 @@ class PredictionEngine:
             f"{geracao_solar:.2f}",
             f"{geracao_eolica:.2f}",
             f"{consumo:.2f}",
-            registro.timestamp.strftime(
-                "%H:%M:%S"
-            )
+            f"{tempo_relativo:.2f}s"
         )
 
         console.print(tabela)
@@ -241,22 +261,33 @@ class PredictionEngine:
             "REGRESSÃO LINEAR"
         )
 
-        if len(self.vetor_tempo) < 2:
+        if len(self.tempos) < 2:
 
             UI.alerta(
-                "Dados insuficientes para regressão"
+                "Dados insuficientes"
             )
 
             return
 
-        # ==============================================
-        # MODELO:
-        # y = ax + b
-        # ==============================================
+        # =================================================
+        # ARRAYS NUMPY
+        # =================================================
+
+        x = np.array(
+            self.tempos
+        )
+
+        y = np.array(
+            self.geracao_solar
+        )
+
+        # =================================================
+        # REGRESSÃO
+        # =================================================
 
         coeficientes = np.polyfit(
-            self.vetor_tempo,
-            self.vetor_geracao_solar,
+            x,
+            y,
             1
         )
 
@@ -267,6 +298,47 @@ class PredictionEngine:
         self.coeficiente_linear = (
             coeficientes[1]
         )
+
+        # =================================================
+        # PREVISÕES
+        # =================================================
+
+        self.y_pred = (
+
+            self.coeficiente_angular * x
+            + self.coeficiente_linear
+
+        )
+
+        # =================================================
+        # RESÍDUOS
+        # =================================================
+
+        self.residuos = (
+            y - self.y_pred
+        )
+
+        # =================================================
+        # R²
+        # =================================================
+
+        ss_res = np.sum(
+            self.residuos ** 2
+        )
+
+        ss_tot = np.sum(
+            (y - np.mean(y)) ** 2
+        )
+
+        self.r2 = (
+            1 - (ss_res / ss_tot)
+        )
+
+        self.modelo_treinado = True
+
+        # =================================================
+        # TABELA
+        # =================================================
 
         tabela = Table(
             title="Modelo Preditivo",
@@ -294,6 +366,11 @@ class PredictionEngine:
         )
 
         tabela.add_row(
+            "R²",
+            f"{self.r2:.4f}"
+        )
+
+        tabela.add_row(
             "Equação",
             (
                 f"y = "
@@ -304,16 +381,110 @@ class PredictionEngine:
 
         console.print(tabela)
 
-        # ==============================================
-        # WIDGET MATEMÁTICO
-        # ==============================================
-
-        console.print(
-            "\n[bold magenta]Equação Visual:[/bold magenta]"
+        UI.sucesso(
+            "Modelo treinado"
         )
 
-        print(
-            ''
+    # =====================================================
+    # ANÁLISE DE RESÍDUOS
+    # =====================================================
+
+    def analisar_residuos(self):
+
+        UI.titulo(
+            "ANÁLISE DE RESÍDUOS"
+        )
+
+        if not self.modelo_treinado:
+
+            UI.alerta(
+                "Modelo ainda não treinado"
+            )
+
+            return
+
+        tabela = Table(
+            title="Resíduos do Modelo",
+            box=box.HEAVY
+        )
+
+        tabela.add_column(
+            "Índice",
+            style="cyan"
+        )
+
+        tabela.add_column(
+            "Real",
+            style="yellow"
+        )
+
+        tabela.add_column(
+            "Previsto",
+            style="green"
+        )
+
+        tabela.add_column(
+            "Resíduo",
+            style="red"
+        )
+
+        for i in range(
+            len(self.geracao_solar)
+        ):
+
+            tabela.add_row(
+                str(i),
+
+                f"{self.geracao_solar[i]:.2f}",
+
+                f"{self.y_pred[i]:.2f}",
+
+                f"{self.residuos[i]:.2f}"
+            )
+
+        console.print(tabela)
+
+        media_residuo = np.mean(
+            self.residuos
+        )
+
+        desvio_residuo = np.std(
+            self.residuos
+        )
+
+        painel_1 = Panel.fit(
+
+            (
+                f"[bold red]"
+                f"{media_residuo:.4f}"
+                f"[/bold red]\n"
+                f"Média dos Resíduos"
+            ),
+
+            border_style="red"
+
+        )
+
+        painel_2 = Panel.fit(
+
+            (
+                f"[bold magenta]"
+                f"{desvio_residuo:.4f}"
+                f"[/bold magenta]\n"
+                f"Desvio Residual"
+            ),
+
+            border_style="magenta"
+
+        )
+
+        console.print(
+            Columns(
+                [
+                    painel_1,
+                    painel_2
+                ]
+            )
         )
 
     # =====================================================
@@ -329,14 +500,22 @@ class PredictionEngine:
             "PREVISÃO ENERGÉTICA"
         )
 
+        if not self.modelo_treinado:
+
+            UI.alerta(
+                "Modelo ainda não treinado"
+            )
+
+            return []
+
         previsoes = []
 
-        ultimo_indice = len(
-            self.vetor_tempo
+        ultimo_tempo = (
+            self.tempos[-1]
         )
 
         tabela = Table(
-            title="Previsão de Geração Solar",
+            title="Previsão Solar",
             box=box.HEAVY_EDGE,
             show_lines=True
         )
@@ -347,7 +526,7 @@ class PredictionEngine:
         )
 
         tabela.add_column(
-            "Geração Prevista",
+            "Previsão",
             style="green"
         )
 
@@ -356,25 +535,44 @@ class PredictionEngine:
             justify="center"
         )
 
-        for i in range(passos_futuros):
+        # =============================================
+        # PASSO TEMPORAL MÉDIO
+        # =============================================
 
-            x_futuro = (
-                ultimo_indice + i
+        if len(self.tempos) > 1:
+
+            delta = np.mean(
+                np.diff(self.tempos)
+            )
+
+        else:
+
+            delta = 1
+
+        for i in range(
+            passos_futuros
+        ):
+
+            tempo_futuro = (
+                ultimo_tempo
+                + delta * (i + 1)
             )
 
             y_previsto = (
+
                 self.coeficiente_angular
-                * x_futuro
+                * tempo_futuro
                 + self.coeficiente_linear
+
             )
 
             previsoes.append(
                 y_previsto
             )
 
-            # ==========================================
+            # =========================================
             # STATUS
-            # ==========================================
+            # =========================================
 
             if y_previsto < 300:
 
@@ -405,7 +603,7 @@ class PredictionEngine:
         return previsoes
 
     # =====================================================
-    # SIMULAÇÃO
+    # SIMULAÇÃO DE CENÁRIOS
     # =====================================================
 
     def simular_cenarios(self):
@@ -414,9 +612,7 @@ class PredictionEngine:
             "SIMULAÇÃO DE CENÁRIOS"
         )
 
-        if len(
-            self.vetor_geracao_solar
-        ) == 0:
+        if len(self.geracao_solar) == 0:
 
             UI.alerta(
                 "Sem dados disponíveis"
@@ -425,15 +621,15 @@ class PredictionEngine:
             return
 
         media_solar = np.mean(
-            self.vetor_geracao_solar
+            self.geracao_solar
         )
 
         media_eolica = np.mean(
-            self.vetor_geracao_eolica
+            self.geracao_eolica
         )
 
         media_consumo = np.mean(
-            self.vetor_consumo
+            self.consumo
         )
 
         cenarios = {
@@ -514,14 +710,12 @@ class PredictionEngine:
         for nome, dados in cenarios.items():
 
             saldo = (
+
                 dados["solar"]
                 + dados["eolica"]
                 - dados["consumo"]
-            )
 
-            # ==========================================
-            # STATUS OPERACIONAL
-            # ==========================================
+            )
 
             if saldo < 0:
 
@@ -543,10 +737,15 @@ class PredictionEngine:
 
             tabela.add_row(
                 nome,
+
                 f"{dados['solar']:.2f}",
+
                 f"{dados['eolica']:.2f}",
+
                 f"{dados['consumo']:.2f}",
+
                 f"{saldo:.2f}",
+
                 status
             )
 
@@ -559,15 +758,13 @@ class PredictionEngine:
     def exibir_estatisticas(self):
 
         UI.titulo(
-            "ESTATÍSTICAS ENERGÉTICAS"
+            "ESTATÍSTICAS"
         )
 
-        if len(
-            self.vetor_geracao_solar
-        ) == 0:
+        if len(self.geracao_solar) == 0:
 
             UI.alerta(
-                "Sem dados estatísticos"
+                "Sem dados"
             )
 
             return
@@ -576,7 +773,7 @@ class PredictionEngine:
 
             (
                 f"[bold yellow]"
-                f"{np.mean(self.vetor_geracao_solar):.2f}"
+                f"{np.mean(self.geracao_solar):.2f}"
                 f"[/bold yellow]\n"
                 f"Média Solar"
             ),
@@ -589,7 +786,7 @@ class PredictionEngine:
 
             (
                 f"[bold cyan]"
-                f"{np.mean(self.vetor_geracao_eolica):.2f}"
+                f"{np.mean(self.geracao_eolica):.2f}"
                 f"[/bold cyan]\n"
                 f"Média Eólica"
             ),
@@ -602,7 +799,7 @@ class PredictionEngine:
 
             (
                 f"[bold red]"
-                f"{np.mean(self.vetor_consumo):.2f}"
+                f"{np.mean(self.consumo):.2f}"
                 f"[/bold red]\n"
                 f"Média Consumo"
             ),
@@ -615,9 +812,9 @@ class PredictionEngine:
 
             (
                 f"[bold magenta]"
-                f"{np.std(self.vetor_geracao_solar):.2f}"
+                f"{self.r2:.4f}"
                 f"[/bold magenta]\n"
-                f"Desvio Solar"
+                f"R² do Modelo"
             ),
 
             border_style="magenta"
@@ -636,7 +833,7 @@ class PredictionEngine:
         )
 
         UI.sucesso(
-            "Análise estatística concluída"
+            "Análise concluída"
         )
 
 
@@ -649,10 +846,6 @@ UI.titulo(
 )
 
 engine = PredictionEngine()
-
-# =========================================================
-# HISTÓRICO
-# =========================================================
 
 engine.adicionar_registro(
     geracao_solar=500,
@@ -685,10 +878,16 @@ engine.adicionar_registro(
 )
 
 # =========================================================
-# REGRESSÃO
+# TREINAMENTO
 # =========================================================
 
 engine.executar_regressao_linear()
+
+# =========================================================
+# RESÍDUOS
+# =========================================================
+
+engine.analisar_residuos()
 
 # =========================================================
 # PREVISÃO
@@ -699,7 +898,7 @@ engine.prever_geracao(
 )
 
 # =========================================================
-# SIMULAÇÕES
+# SIMULAÇÃO
 # =========================================================
 
 engine.simular_cenarios()
