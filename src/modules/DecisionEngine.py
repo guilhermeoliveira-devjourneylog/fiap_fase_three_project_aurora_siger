@@ -138,12 +138,178 @@ class EventoOperacional:
 
 class DecisionEngine:
     """
-    Motor responsável por:
-    - regras condicionais;
-    - priorização;
-    - análise de risco;
-    - decisões automáticas;
-    - acionamento de alertas.
+    Motor de decisão inteligente da Colônia Aurora.
+
+    Responsável pela automação operacional, análise de
+    riscos críticos e gerenciamento dos estados globais
+    da infraestrutura da colônia.
+
+    A classe atua como núcleo estratégico do sistema,
+    avaliando eventos operacionais em tempo real e
+    executando respostas automáticas baseadas em regras
+    condicionais e níveis de criticidade.
+
+    =====================================================
+    RESPONSABILIDADES
+    =====================================================
+
+    - análise de risco operacional;
+    - classificação de criticidade;
+    - automação de respostas;
+    - gerenciamento de contingência;
+    - priorização de subsistemas;
+    - monitoramento global;
+    - acionamento de alertas;
+    - alteração do estado operacional da colônia.
+
+    =====================================================
+    ARQUITETURA OPERACIONAL
+    =====================================================
+
+    Evento Operacional
+            ↓
+    Análise de Risco
+            ↓
+    Classificação de Criticidade
+            ↓
+    Automação de Resposta
+            ↓
+    Atualização dos Subsistemas
+            ↓
+    Estado Global da Colônia
+            ↓
+    Geração de Alertas
+
+    =====================================================
+    ESTRUTURAS UTILIZADAS
+    =====================================================
+
+    • Heap Queue (heapq)
+        Utilizada para priorização operacional dos
+        subsistemas críticos.
+
+    • Dicionários
+        Responsáveis pelo armazenamento do estado
+        operacional dos módulos da colônia.
+
+    • Enumerações
+        Padronizam estados globais e níveis de risco.
+
+    • Listas
+        Mantêm histórico de alertas gerados.
+
+    =====================================================
+    SUBSISTEMAS GERENCIADOS
+    =====================================================
+
+    - energia;
+    - temperatura;
+    - estrutura;
+    - comunicação;
+    - suporte de vida.
+
+    Cada subsistema possui:
+    - estado operacional;
+    - prioridade;
+    - comportamento automatizado.
+
+    =====================================================
+    NÍVEIS DE RISCO
+    =====================================================
+
+    BAIXO
+        Operação estável.
+
+    MODERADO
+        Necessita monitoramento.
+
+    ALTO
+        Requer ações preventivas.
+
+    CRÍTICO
+        Aciona protocolos emergenciais.
+
+    =====================================================
+    ESTADOS GLOBAIS
+    =====================================================
+
+    NORMAL
+        Colônia operando normalmente.
+
+    ALERTA
+        Existem anomalias moderadas.
+
+    CONTINGÊNCIA
+        Recursos críticos comprometidos.
+
+    EMERGÊNCIA
+        Situação operacional crítica.
+
+    =====================================================
+    ATRIBUTOS
+    =====================================================
+
+    estado_atual : EstadoSistema
+        Estado operacional global da colônia.
+
+    fila_prioridade : list
+        Heap prioritário utilizado para ordenação
+        estratégica dos subsistemas.
+
+    alertas : List[str]
+        Histórico de alertas operacionais gerados.
+
+    subsistemas : Dict[str, Dict]
+        Estrutura contendo estados e prioridades dos
+        módulos monitorados.
+
+    =====================================================
+    PRINCIPAIS MÉTODOS
+    =====================================================
+
+    analisar_risco(evento)
+        Calcula criticidade operacional baseada na
+        relação entre valor atual e limite seguro.
+
+    priorizar_subsistemas()
+        Ordena os subsistemas utilizando heap
+        prioritário.
+
+    executar_automacao(evento)
+        Executa respostas automáticas baseadas
+        no nível de risco identificado.
+
+    alterar_estado()
+        Atualiza o estado global da colônia
+        considerando todos os subsistemas.
+
+    exibir_alertas()
+        Exibe a central de alertas operacionais.
+
+    =====================================================
+    EXEMPLO DE FLUXO
+    =====================================================
+
+    Evento de Energia
+            ↓
+    Consumo acima do limite
+            ↓
+    Risco classificado como ALTO
+            ↓
+    Ativação do modo contingência
+            ↓
+    Geração de alerta operacional
+            ↓
+    Atualização do estado global
+
+    =====================================================
+    OBJETIVO
+    =====================================================
+
+    Garantir estabilidade operacional da Colônia
+    Aurora através de tomada de decisão automatizada,
+    mitigação de riscos e resposta inteligente
+    a eventos críticos.
     """
 
     def __init__(self):
