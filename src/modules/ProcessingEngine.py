@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Dict, List
+
 import numpy as np
 
 # =========================================================
@@ -11,7 +12,7 @@ from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
 from rich.align import Align
-from rich.text import Text
+from rich.columns import Columns
 from rich.rule import Rule
 from rich import box
 
@@ -23,9 +24,30 @@ console = Console()
 
 @dataclass
 class RegistroProcessado:
+    """
+    Estrutura responsável por representar um registro
+    processado pelo Processing Engine.
+
+    Atributos:
+        sensor_id:
+            Identificador único do sensor.
+
+        tipo:
+            Categoria operacional do sensor.
+
+        valor:
+            Valor numérico capturado.
+
+        timestamp:
+            Momento exato da ingestão.
+    """
+
     sensor_id: str
+
     tipo: str
+
     valor: float
+
     timestamp: datetime
 
 
@@ -34,6 +56,18 @@ class RegistroProcessado:
 # =========================================================
 
 class UI:
+    """
+    Camada utilitária responsável pela renderização
+    visual no terminal utilizando Rich.
+
+    Responsabilidades:
+    - títulos;
+    - seções;
+    - mensagens operacionais;
+    - painéis;
+    - alertas;
+    - feedback visual.
+    """
 
     @staticmethod
     def titulo(texto):
@@ -95,60 +129,117 @@ class UI:
 
 class ProcessingEngine:
     """
-    Camada responsável pelo processamento dos dados
-    da colônia Aurora.
+    Motor analítico responsável pelo processamento
+    operacional da Colônia Aurora.
 
-    Responsabilidades:
+    =====================================================
+    RESPONSABILIDADES
+    =====================================================
+
+    - ingestão de telemetria;
     - limpeza de dados;
-    - validação;
-    - cálculos;
-    - estatísticas;
+    - validação operacional;
+    - cálculos estatísticos;
+    - agregações analíticas;
+    - atualização matricial;
+    - monitoramento de estados;
+    - geração de métricas globais.
+
+    =====================================================
+    PIPELINE ANALÍTICO
+    =====================================================
+
+    Sensores
+        ↓
+    Validação
+        ↓
+    Limpeza
+        ↓
+    Vetorização NumPy
+        ↓
+    Estatísticas
+        ↓
+    Estados Operacionais
+
+    =====================================================
+    RECURSOS IMPLEMENTADOS
+    =====================================================
+
+    - média;
+    - desvio padrão;
+    - mínimo;
+    - máximo;
+    - mediana;
+    - percentis;
     - agregações;
-    - atualização de estados.
+    - matriz operacional;
+    - estados dinâmicos.
+
+    =====================================================
+    MELHORIAS PRIORITÁRIAS IMPLEMENTADAS
+    =====================================================
+
+    ✔ Correção de vetores vazios
+    ✔ Percentis operacionais
+    ✔ Mediana
+    ✔ Variância
+    ✔ Índice de estabilidade
+    ✔ Proteção contra índices inválidos
+    ✔ Correção de classificação crítica
+    ✔ Estatísticas completas
+    ✔ Diagnóstico energético
+    ✔ Diagnóstico térmico
     """
 
     def __init__(self):
 
-        # ==============================================
-        # Histórico processado
-        # ==============================================
+        # =================================================
+        # HISTÓRICO PROCESSADO
+        # =================================================
 
         self.dados_processados: List[
             RegistroProcessado
         ] = []
 
-        # ==============================================
-        # Vetores NumPy
-        # ==============================================
+        # =================================================
+        # VETORES NUMPY
+        # =================================================
 
         self.vetor_temperaturas = np.array([])
 
         self.vetor_consumo = np.array([])
 
-        # ==============================================
-        # Matrizes
-        # ==============================================
+        self.vetor_solar = np.array([])
+
+        self.vetor_eolico = np.array([])
+
+        # =================================================
+        # MATRIZ OPERACIONAL
+        # =================================================
 
         self.matriz_operacional = np.zeros(
             (5, 24)
         )
 
-        # ==============================================
-        # Estatísticas
-        # ==============================================
+        # =================================================
+        # ESTATÍSTICAS
+        # =================================================
 
         self.estatisticas: Dict[
             str,
             Dict
         ] = {}
 
-        # ==============================================
-        # Estados
-        # ==============================================
+        # =================================================
+        # ESTADOS
+        # =================================================
 
         self.estado_colonia = {
+
             "energia": "ESTÁVEL",
+
             "temperatura": "NORMAL",
+
             "estrutura": "SEGURA"
         }
 
@@ -164,6 +255,17 @@ class ProcessingEngine:
         self,
         registros: List[RegistroProcessado]
     ) -> List[RegistroProcessado]:
+        """
+        Remove registros inválidos do pipeline.
+
+        Regras:
+        - valores None são descartados;
+        - NaN é descartado;
+        - infinitos são descartados.
+
+        Retorna:
+            Lista contendo apenas registros válidos.
+        """
 
         UI.secao(
             "LIMPEZA DE DADOS"
@@ -179,7 +281,12 @@ class ProcessingEngine:
             if np.isnan(registro.valor):
                 continue
 
-            dados_limpos.append(registro)
+            if np.isinf(registro.valor):
+                continue
+
+            dados_limpos.append(
+                registro
+            )
 
         tabela = Table(
             title="Resultado da Limpeza",
@@ -187,12 +294,12 @@ class ProcessingEngine:
         )
 
         tabela.add_column(
-            "Registros Recebidos",
+            "Recebidos",
             justify="center"
         )
 
         tabela.add_column(
-            "Registros Válidos",
+            "Válidos",
             justify="center"
         )
 
@@ -202,10 +309,6 @@ class ProcessingEngine:
         )
 
         console.print(tabela)
-
-        UI.sucesso(
-            "Limpeza concluída"
-        )
 
         return dados_limpos
 
@@ -217,21 +320,46 @@ class ProcessingEngine:
         self,
         registro: RegistroProcessado
     ) -> bool:
+        """
+        Realiza validação operacional.
+
+        Critérios:
+        - tipo conhecido;
+        - valor dentro da faixa operacional.
+
+        Retorna:
+            True caso válido.
+        """
 
         limites = {
-            "temperatura_interna": (-20, 50),
-            "temperatura_externa": (-150, 80),
-            "velocidade_vento": (0, 250),
-            "geracao_solar": (0, 1500),
-            "geracao_eolica": (0, 1200),
-            "consumo_energetico": (0, 5000),
-            "integridade_estrutural": (0, 100)
+
+            "temperatura_interna":
+                (-20, 50),
+
+            "temperatura_externa":
+                (-150, 80),
+
+            "velocidade_vento":
+                (0, 250),
+
+            "geracao_solar":
+                (0, 1500),
+
+            "geracao_eolica":
+                (0, 1200),
+
+            "consumo_energetico":
+                (0, 5000),
+
+            "integridade_estrutural":
+                (0, 100)
         }
 
         if registro.tipo not in limites:
 
             UI.erro(
-                f"Tipo desconhecido -> {registro.tipo}"
+                f"Tipo desconhecido -> "
+                f"{registro.tipo}"
             )
 
             return False
@@ -250,13 +378,19 @@ class ProcessingEngine:
         )
 
         tabela.add_column("Sensor")
+
         tabela.add_column("Tipo")
+
         tabela.add_column("Valor")
+
         tabela.add_column("Status")
 
         status = (
+
             "[green]VÁLIDO[/green]"
+
             if valido
+
             else "[red]INVÁLIDO[/red]"
         )
 
@@ -279,24 +413,35 @@ class ProcessingEngine:
         self,
         vetor: np.ndarray
     ) -> float:
+        """
+        Calcula média aritmética.
+
+        Retorna:
+            Média do vetor.
+        """
 
         UI.secao(
             "CÁLCULO DE MÉDIA"
         )
 
-        if len(vetor) == 0:
+        if vetor.size == 0:
 
             UI.warning(
                 "Vetor vazio"
             )
 
-            return 0
+            return 0.0
 
-        media = float(np.mean(vetor))
+        media = float(
+            np.mean(vetor)
+        )
 
         painel = Panel.fit(
+
             f"[bold cyan]{media:.2f}[/bold cyan]",
-            title="Média Calculada",
+
+            title="Média",
+
             border_style="cyan"
         )
 
@@ -314,6 +459,35 @@ class ProcessingEngine:
         horario: int,
         valor: float
     ):
+        """
+        Atualiza matriz operacional.
+
+        Args:
+            modulo:
+                Índice do módulo.
+
+            horario:
+                Índice horário.
+
+            valor:
+                Valor operacional.
+        """
+
+        if not (0 <= modulo < 5):
+
+            UI.erro(
+                "Módulo inválido"
+            )
+
+            return
+
+        if not (0 <= horario < 24):
+
+            UI.erro(
+                "Horário inválido"
+            )
+
+            return
 
         self.matriz_operacional[
             modulo
@@ -325,7 +499,9 @@ class ProcessingEngine:
         )
 
         tabela.add_column("Módulo")
+
         tabela.add_column("Horário")
+
         tabela.add_column("Valor")
 
         tabela.add_row(
@@ -341,66 +517,70 @@ class ProcessingEngine:
     # =====================================================
 
     def processar_estatisticas(self):
+        """
+        Processa estatísticas globais.
+
+        Métricas:
+        - média;
+        - mediana;
+        - máximo;
+        - mínimo;
+        - desvio padrão;
+        - variância;
+        - percentil 90.
+        """
 
         UI.titulo(
             "PROCESSAMENTO ESTATÍSTICO"
         )
 
-        if len(self.vetor_temperaturas) > 0:
+        self.estatisticas = {}
 
-            self.estatisticas["temperaturas"] = {
+        datasets = {
+
+            "temperaturas":
+                self.vetor_temperaturas,
+
+            "consumo":
+                self.vetor_consumo,
+
+            "solar":
+                self.vetor_solar,
+
+            "eolico":
+                self.vetor_eolico
+        }
+
+        for nome, vetor in datasets.items():
+
+            if vetor.size == 0:
+                continue
+
+            self.estatisticas[nome] = {
 
                 "media":
-                    float(
-                        np.mean(
-                            self.vetor_temperaturas
-                        )
-                    ),
+                    float(np.mean(vetor)),
+
+                "mediana":
+                    float(np.median(vetor)),
 
                 "maximo":
-                    float(
-                        np.max(
-                            self.vetor_temperaturas
-                        )
-                    ),
+                    float(np.max(vetor)),
 
                 "minimo":
-                    float(
-                        np.min(
-                            self.vetor_temperaturas
-                        )
-                    ),
+                    float(np.min(vetor)),
 
                 "desvio_padrao":
+                    float(np.std(vetor)),
+
+                "variancia":
+                    float(np.var(vetor)),
+
+                "percentil_90":
                     float(
-                        np.std(
-                            self.vetor_temperaturas
-                        )
-                    )
-            }
-
-        if len(self.vetor_consumo) > 0:
-
-            self.estatisticas["consumo"] = {
-
-                "media":
-                    float(
-                        np.mean(
-                            self.vetor_consumo
-                        )
-                    ),
-
-                "pico":
-                    float(
-                        np.max(
-                            self.vetor_consumo
-                        )
-                    ),
-
-                "minimo":
-                    float(
-                        np.min(
-                            self.vetor_consumo
+                        np.percentile(
+                            vetor,
+                            90
                         )
                     )
             }
@@ -410,14 +590,21 @@ class ProcessingEngine:
         ):
 
             tabela = Table(
-                title=f"{categoria.upper()}",
+                title=categoria.upper(),
                 box=box.ROUNDED
             )
 
-            tabela.add_column("Métrica")
-            tabela.add_column("Valor")
+            tabela.add_column(
+                "Métrica"
+            )
 
-            for chave, valor in valores.items():
+            tabela.add_column(
+                "Valor"
+            )
+
+            for chave, valor in (
+                valores.items()
+            ):
 
                 tabela.add_row(
                     chave,
@@ -434,6 +621,16 @@ class ProcessingEngine:
         self,
         registros: List[RegistroProcessado]
     ):
+        """
+        Executa agregações analíticas.
+
+        Produz:
+        - média;
+        - soma;
+        - quantidade;
+        - máximo;
+        - mínimo.
+        """
 
         UI.titulo(
             "AGREGAÇÕES ANALÍTICAS"
@@ -443,15 +640,10 @@ class ProcessingEngine:
 
         for registro in registros:
 
-            if registro.tipo not in agregacoes:
-
-                agregacoes[
-                    registro.tipo
-                ] = []
-
-            agregacoes[
-                registro.tipo
-            ].append(
+            agregacoes.setdefault(
+                registro.tipo,
+                []
+            ).append(
                 registro.valor
             )
 
@@ -461,20 +653,33 @@ class ProcessingEngine:
         )
 
         tabela.add_column("Tipo")
+
         tabela.add_column("Média")
+
         tabela.add_column("Soma")
-        tabela.add_column("Quantidade")
 
-        for tipo, valores in agregacoes.items():
+        tabela.add_column("Máximo")
 
-            media = np.mean(valores)
+        tabela.add_column("Mínimo")
 
-            soma = np.sum(valores)
+        tabela.add_column("Qtd")
+
+        for tipo, valores in (
+            agregacoes.items()
+        ):
 
             tabela.add_row(
+
                 tipo,
-                f"{media:.2f}",
-                f"{soma:.2f}",
+
+                f"{np.mean(valores):.2f}",
+
+                f"{np.sum(valores):.2f}",
+
+                f"{np.max(valores):.2f}",
+
+                f"{np.min(valores):.2f}",
+
                 str(len(valores))
             )
 
@@ -485,6 +690,15 @@ class ProcessingEngine:
     # =====================================================
 
     def atualizar_estados(self):
+        """
+        Atualiza estados operacionais.
+
+        Estados:
+        - NORMAL;
+        - ALERTA;
+        - CRÍTICA;
+        - SOBRECARGA.
+        """
 
         UI.titulo(
             "ATUALIZAÇÃO DOS ESTADOS"
@@ -498,17 +712,17 @@ class ProcessingEngine:
             self.vetor_consumo
         )
 
-        # ==========================================
+        # =================================================
         # TEMPERATURA
-        # ==========================================
+        # =================================================
 
-        if media_temp > 35:
+        if media_temp >= 35:
 
             self.estado_colonia[
                 "temperatura"
             ] = "CRÍTICA"
 
-        elif media_temp > 28:
+        elif media_temp >= 28:
 
             self.estado_colonia[
                 "temperatura"
@@ -520,17 +734,17 @@ class ProcessingEngine:
                 "temperatura"
             ] = "NORMAL"
 
-        # ==========================================
+        # =================================================
         # ENERGIA
-        # ==========================================
+        # =================================================
 
-        if media_consumo > 3000:
+        if media_consumo >= 3000:
 
             self.estado_colonia[
                 "energia"
             ] = "SOBRECARGA"
 
-        elif media_consumo > 1800:
+        elif media_consumo >= 1800:
 
             self.estado_colonia[
                 "energia"
@@ -547,8 +761,13 @@ class ProcessingEngine:
             box=box.DOUBLE
         )
 
-        tabela.add_column("Subsystem")
-        tabela.add_column("Status")
+        tabela.add_column(
+            "Subsystem"
+        )
+
+        tabela.add_column(
+            "Status"
+        )
 
         for chave, valor in (
             self.estado_colonia.items()
@@ -573,6 +792,63 @@ class ProcessingEngine:
         console.print(tabela)
 
     # =====================================================
+    # ESTABILIDADE
+    # =====================================================
+
+    def calcular_estabilidade_energetica(self):
+        """
+        Calcula índice de estabilidade energética.
+
+        Fórmula:
+
+        Quanto menor o desvio padrão,
+        maior a estabilidade.
+        """
+
+        UI.titulo(
+            "ESTABILIDADE ENERGÉTICA"
+        )
+
+        if self.vetor_consumo.size == 0:
+
+            UI.warning(
+                "Sem dados energéticos"
+            )
+
+            return
+
+        media = np.mean(
+            self.vetor_consumo
+        )
+
+        desvio = np.std(
+            self.vetor_consumo
+        )
+
+        indice = max(
+            0,
+            100 - (
+                (desvio / media) * 100
+            )
+        )
+
+        painel = Panel.fit(
+
+            (
+                f"[bold green]"
+                f"{indice:.2f}%"
+                f"[/bold green]\n\n"
+                f"Desvio: {desvio:.2f}"
+            ),
+
+            title="Índice de Estabilidade",
+
+            border_style="green"
+        )
+
+        console.print(painel)
+
+    # =====================================================
     # INGESTÃO
     # =====================================================
 
@@ -582,19 +858,33 @@ class ProcessingEngine:
         tipo: str,
         valor: float
     ):
+        """
+        Realiza ingestão operacional.
+
+        Fluxo:
+        - validação;
+        - armazenamento;
+        - vetorização.
+        """
 
         UI.secao(
             "INGESTÃO DE TELEMETRIA"
         )
 
         registro = RegistroProcessado(
+
             sensor_id=sensor_id,
+
             tipo=tipo,
+
             valor=valor,
+
             timestamp=datetime.now()
         )
 
-        if not self.validar_dados(registro):
+        if not self.validar_dados(
+            registro
+        ):
 
             UI.erro(
                 "Registro descartado"
@@ -606,9 +896,9 @@ class ProcessingEngine:
             registro
         )
 
-        # ==========================================
-        # Vetores especializados
-        # ==========================================
+        # =================================================
+        # VETORES ESPECIALIZADOS
+        # =================================================
 
         if "temperatura" in tipo:
 
@@ -624,7 +914,22 @@ class ProcessingEngine:
                 valor
             )
 
+        if "solar" in tipo:
+
+            self.vetor_solar = np.append(
+                self.vetor_solar,
+                valor
+            )
+
+        if "eolica" in tipo:
+
+            self.vetor_eolico = np.append(
+                self.vetor_eolico,
+                valor
+            )
+
         painel = Panel.fit(
+
             (
                 f"[bold green]"
                 f"{sensor_id}"
@@ -634,7 +939,9 @@ class ProcessingEngine:
                 f"Timestamp: "
                 f"{registro.timestamp.strftime('%H:%M:%S')}"
             ),
+
             title="Registro Processado",
+
             border_style="green"
         )
 
@@ -668,6 +975,12 @@ engine.adicionar_registro(
 )
 
 engine.adicionar_registro(
+    "TEMP-INT-03",
+    "temperatura_interna",
+    36.1
+)
+
+engine.adicionar_registro(
     "ENERGIA-01",
     "consumo_energetico",
     2100
@@ -677,6 +990,24 @@ engine.adicionar_registro(
     "ENERGIA-02",
     "consumo_energetico",
     3200
+)
+
+engine.adicionar_registro(
+    "SOLAR-01",
+    "geracao_solar",
+    840
+)
+
+engine.adicionar_registro(
+    "SOLAR-02",
+    "geracao_solar",
+    920
+)
+
+engine.adicionar_registro(
+    "EOLICA-01",
+    "geracao_eolica",
+    430
 )
 
 # =========================================================
@@ -716,6 +1047,16 @@ engine.executar_agregacoes(
 # =========================================================
 
 engine.atualizar_estados()
+
+# =========================================================
+# ESTABILIDADE
+# =========================================================
+
+engine.calcular_estabilidade_energetica()
+
+# =========================================================
+# FINALIZAÇÃO
+# =========================================================
 
 UI.titulo(
     "PROCESSAMENTO FINALIZADO"
