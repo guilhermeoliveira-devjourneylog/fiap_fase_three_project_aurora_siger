@@ -94,16 +94,147 @@ class RegistroEnergetico:
 
 class PredictionEngine:
     """
-    Sistema responsável por:
+    =====================================================
+    PREDICTION ENGINE
+    =====================================================
 
-    - ingestão energética;
-    - regressão linear;
-    - previsão operacional;
+    Motor analítico responsável pela camada preditiva
+    do sistema operacional da colônia Aurora.
+
+    A classe executa processos de:
+
+    - ingestão de registros energéticos;
+    - armazenamento histórico temporal;
+    - regressão linear aplicada à geração solar;
+    - previsão operacional futura;
     - análise estatística;
     - análise de resíduos;
-    - simulação de cenários.
-    """
+    - simulação de cenários críticos;
+    - avaliação da estabilidade energética.
 
+    =====================================================
+    OBJETIVO
+    =====================================================
+
+    Fornecer inteligência preditiva para suporte
+    à tomada de decisão energética da infraestrutura
+    da colônia.
+
+    O modelo utiliza regressão linear simples para
+    identificar tendências de crescimento ou queda
+    da geração solar ao longo do tempo operacional.
+
+    =====================================================
+    COMPONENTES INTERNOS
+    =====================================================
+
+    historico:
+        Lista contendo objetos RegistroEnergetico.
+
+    tempos:
+        Lista com os tempos relativos em segundos.
+
+    geracao_solar:
+        Série temporal da geração solar.
+
+    geracao_eolica:
+        Série temporal da geração eólica.
+
+    consumo:
+        Série temporal de consumo energético.
+
+    coeficiente_angular:
+        Inclinação da reta da regressão linear.
+
+    coeficiente_linear:
+        Interceptação da reta no eixo Y.
+
+    r2:
+        Coeficiente de determinação do modelo.
+
+    residuos:
+        Diferença entre valores reais e previstos.
+
+    y_pred:
+        Valores previstos pelo modelo linear.
+
+    modelo_treinado:
+        Indicador lógico do estado do treinamento.
+
+    =====================================================
+    CAPACIDADES ANALÍTICAS
+    =====================================================
+
+    1. Ingestão Energética
+       - Armazena registros operacionais.
+       - Mantém histórico temporal contínuo.
+
+    2. Regressão Linear
+       - Identifica tendência da geração solar.
+       - Calcula coeficientes matemáticos.
+       - Avalia qualidade do ajuste via R².
+
+    3. Previsão Operacional
+       - Estima geração futura.
+       - Classifica estabilidade energética.
+
+    4. Análise de Resíduos
+       - Mede erro do modelo.
+       - Detecta desvios operacionais.
+
+    5. Simulação de Cenários
+       - Tempestades de areia.
+       - Falhas energéticas.
+       - Expansão da colônia.
+
+    6. Estatísticas Gerais
+       - Médias operacionais.
+       - Indicadores de estabilidade.
+       - Indicadores de desempenho preditivo.
+
+    =====================================================
+    DEPENDÊNCIAS
+    =====================================================
+
+    - numpy
+    - rich
+    - datetime
+    - dataclasses
+
+    =====================================================
+    EXEMPLO DE UTILIZAÇÃO
+    =====================================================
+
+    engine = PredictionEngine()
+
+    engine.adicionar_registro(
+        geracao_solar=500,
+        geracao_eolica=220,
+        consumo=600
+    )
+
+    engine.executar_regressao_linear()
+
+    engine.prever_geracao(
+        passos_futuros=5
+    )
+
+    =====================================================
+    OBSERVAÇÕES
+    =====================================================
+
+    - O modelo atual utiliza regressão linear simples.
+    - Pode futuramente evoluir para:
+        * regressão polinomial;
+        * séries temporais;
+        * machine learning;
+        * redes neurais;
+        * modelos híbridos energéticos.
+
+    - O sistema foi projetado com foco educacional,
+      arquitetural e visual para o projeto Aurora SIGER.
+    """
+    
     def __init__(self):
 
         # =================================================
