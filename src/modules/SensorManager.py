@@ -177,6 +177,95 @@ class Sensor:
 # =========================================================
 
 class SensorManager:
+    """
+    Camada responsável pelo gerenciamento completo da
+    infraestrutura sensorial da Colônia Aurora.
+
+    Objetivos:
+    ----------
+    - registrar sensores operacionais;
+    - coletar telemetria em tempo real;
+    - validar leituras;
+    - monitorar integridade dos sensores;
+    - detectar falhas operacionais;
+    - armazenar histórico de leituras;
+    - emitir alertas automáticos.
+
+    Fluxo Operacional:
+    ------------------
+    Registro de Sensores
+            ↓
+    Coleta de Dados
+            ↓
+    Validação Operacional
+            ↓
+    Monitoramento de Integridade
+            ↓
+    Geração de Alertas
+
+    Estruturas Internas:
+    --------------------
+    sensores:
+        Dicionário contendo todos os sensores ativos.
+
+    historico:
+        Lista com todas as leituras coletadas.
+
+    alertas:
+        Lista textual contendo alertas operacionais.
+
+    Funcionalidades:
+    ----------------
+    registrar_sensor()
+        Registra sensores na infraestrutura.
+
+    coletar_dados()
+        Realiza aquisição de telemetria.
+
+    validar_dados()
+        Verifica leituras fora da faixa operacional.
+
+    monitorar_integridade()
+        Exibe status operacional dos sensores.
+
+    exibir_alertas()
+        Mostra a central de alertas ativa.
+
+    Características Técnicas:
+    -------------------------
+    - arquitetura orientada a objetos;
+    - utilização de dataclasses;
+    - enumeração tipada;
+    - persistência em memória;
+    - interface Rich para terminal;
+    - monitoramento em tempo real;
+    - validação operacional automatizada.
+
+    Sensores Suportados:
+    --------------------
+    - temperatura interna;
+    - temperatura externa;
+    - velocidade do vento;
+    - geração solar;
+    - geração eólica;
+    - consumo energético;
+    - estado dos módulos;
+    - integridade estrutural.
+
+    Status Operacionais:
+    --------------------
+    ONLINE
+        Sensor operando normalmente.
+
+    OFFLINE
+        Sensor sem comunicação.
+
+    ALERTA
+        Valor fora da faixa operacional.
+
+    FALHA
+        Sensor comprometido criticamente.
+    """
 
     def __init__(self):
 
@@ -206,6 +295,29 @@ class SensorManager:
         limite_min: float,
         limite_max: float
     ):
+        """
+        Registra um novo sensor operacional.
+
+        Parâmetros:
+        -----------
+        sensor_id:
+            Identificador único do sensor.
+
+        tipo:
+            Tipo operacional do sensor.
+
+        limite_min:
+            Valor mínimo permitido.
+
+        limite_max:
+            Valor máximo permitido.
+
+        Processo:
+        ---------
+        1. Instancia o sensor.
+        2. Adiciona ao dicionário operacional.
+        3. Exibe confirmação visual.
+        """
 
         sensor = Sensor(
             sensor_id,
@@ -249,6 +361,25 @@ class SensorManager:
     # =====================================================
 
     def coletar_dados(self):
+        """
+        Executa a coleta completa de telemetria.
+
+        Funcionamento:
+        ---------------
+        - percorre todos os sensores registrados;
+        - gera leituras simuladas;
+        - cria objetos de telemetria;
+        - atualiza histórico operacional;
+        - armazena última leitura do sensor.
+
+        Resultado:
+        ----------
+        Todas as leituras ficam disponíveis para:
+        - validação;
+        - processamento;
+        - análise preditiva;
+        - geração de alertas.
+        """
 
         UI.titulo(
             "COLETA DE TELEMETRIA"
@@ -315,6 +446,23 @@ class SensorManager:
     # =====================================================
 
     def validar_dados(self):
+        """
+        Valida todas as leituras operacionais.
+
+        Regras:
+        -------
+        - compara leitura atual com limites definidos;
+        - atualiza status do sensor;
+        - registra alertas automáticos.
+
+        Status possíveis:
+        -----------------
+        ONLINE:
+            Valor dentro da faixa operacional.
+
+        ALERTA:
+            Valor fora da faixa permitida.
+        """
 
         UI.titulo(
             "VALIDAÇÃO OPERACIONAL"
@@ -407,6 +555,21 @@ class SensorManager:
     # =====================================================
 
     def monitorar_integridade(self):
+        """
+        Exibe o monitoramento visual da integridade
+        de todos os sensores registrados.
+
+        Indicadores:
+        ------------
+        Verde:
+            Sensor operacional.
+
+        Amarelo:
+            Sensor em alerta.
+
+        Vermelho:
+            Sensor offline.
+        """
 
         UI.titulo(
             "MONITORAMENTO DA INTEGRIDADE"
@@ -464,6 +627,19 @@ class SensorManager:
     # =====================================================
 
     def exibir_alertas(self):
+        """
+        Exibe todos os alertas operacionais ativos.
+
+        Funcionamento:
+        ---------------
+        - apresenta alertas em tabela visual;
+        - enumera ocorrências;
+        - informa falhas operacionais detectadas.
+
+        Caso não existam alertas:
+        -------------------------
+        Um painel verde de estabilidade é exibido.
+        """
 
         UI.titulo(
             "CENTRAL DE ALERTAS"
