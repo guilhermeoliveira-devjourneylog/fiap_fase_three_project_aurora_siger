@@ -17,3 +17,7 @@ pip install -r requirements.txt
 cd fiap_fase_three_project_aurora_siger
 python app.py
 ```
+
+## Execução gerar notebook html
+
+jupyter nbconvert --to html notebook.ipynb
