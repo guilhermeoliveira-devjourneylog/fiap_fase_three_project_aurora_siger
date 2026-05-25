@@ -110,12 +110,190 @@ class TreeNode:
 
 class StorageManager:
     """
-    Camada responsável pelo armazenamento
-    e organização dos dados da colônia Aurora.
+    Camada responsável pelo armazenamento, indexação,
+    organização estrutural e persistência lógica dos
+    dados operacionais da Colônia Aurora.
+
+    Objetivos:
+    ----------
+    - armazenar telemetria em tempo real;
+    - organizar dados históricos;
+    - indexar registros por sensor;
+    - estruturar dados matriciais;
+    - validar integridade via hashing;
+    - manter buffers analíticos;
+    - representar a hierarquia da colônia.
+
+    Arquitetura Interna:
+    --------------------
+    Histórico Linear:
+        Lista cronológica contendo toda telemetria.
+
+    Hash Table:
+        Estrutura otimizada para busca por sensor.
+
+    Buffer Vetorial:
+        Vetores NumPy para cálculos estatísticos.
+
+    Matrizes:
+        Estruturas matriciais para modelagem energética.
+
+    Árvore Hierárquica:
+        Estrutura organizacional da colônia Aurora.
+
+    Fluxo Operacional:
+    ------------------
+    Recepção de Telemetria
+            ↓
+    Armazenamento Histórico
+            ↓
+    Indexação HASH
+            ↓
+    Atualização de Buffers
+            ↓
+    Processamento Estatístico
+            ↓
+    Monitoramento Estrutural
+
+    Estruturas Utilizadas:
+    ----------------------
+    List:
+        Histórico sequencial de telemetria.
+
+    Dict:
+        Indexação rápida de sensores.
+
+    NumPy Arrays:
+        Processamento matemático vetorial.
+
+    Matrix:
+        Simulação energética temporal.
+
+    Tree:
+        Representação hierárquica da colônia.
+
+    Responsabilidades:
+    ------------------
+    armazenar_telemetria()
+        Persiste novos registros operacionais.
+
+    consultar_historico()
+        Recupera dados históricos.
+
+    atualizar_hash()
+        Verifica integridade criptográfica.
+
+    atualizar_matriz_energia()
+        Atualiza matriz energética operacional.
+
+    exibir_matriz_energia()
+        Exibe visualização energética.
+
+    calcular_media_temperaturas()
+        Executa análise térmica global.
+
+    exibir_hierarquia()
+        Mostra arquitetura estrutural da colônia.
+
+    Subsistemas Monitorados:
+    ------------------------
+    Energia:
+        - geração solar;
+        - geração eólica;
+        - consumo energético.
+
+    Sensores:
+        - temperatura;
+        - velocidade do vento.
+
+    Infraestrutura:
+        - módulos;
+        - integridade estrutural.
+
+    Recursos Técnicos:
+    ------------------
+    - armazenamento em memória;
+    - indexação O(1) via hash table;
+    - cálculos vetoriais NumPy;
+    - verificação SHA-256;
+    - estruturas hierárquicas;
+    - interface Rich Terminal UI;
+    - modelagem matricial temporal.
+
+    Segurança e Integridade:
+    ------------------------
+    Todos os registros podem possuir:
+    - verificação criptográfica;
+    - rastreabilidade temporal;
+    - organização hierárquica;
+    - indexação segura.
+
+    Características Operacionais:
+    -----------------------------
+    - processamento em tempo real;
+    - arquitetura modular;
+    - persistência temporária;
+    - análise estatística;
+    - visualização operacional;
+    - monitoramento energético.
+
+    Aplicação na Colônia Aurora:
+    ----------------------------
+    Esta camada representa o núcleo de persistência
+    operacional da infraestrutura computacional da
+    colônia, permitindo:
+
+    - armazenamento de telemetria;
+    - rastreamento operacional;
+    - análise histórica;
+    - suporte à IA preditiva;
+    - suporte ao motor decisório;
+    - monitoramento estrutural.
+
+    Integração Sistêmica:
+    ---------------------
+    SensorManager
+            ↓
+    StorageManager
+            ↓
+    ProcessingEngine
+            ↓
+    PredictionEngine
+            ↓
+    DecisionEngine
     """
 
     def __init__(self):
+        """
+        Inicializa o sistema de armazenamento da
+        Colônia Aurora.
 
+        Estruturas Inicializadas:
+        -------------------------
+        historico:
+            Lista principal de telemetria.
+
+        buffer_temperaturas:
+            Vetor NumPy para análise térmica.
+
+        matriz_energia:
+            Matriz temporal energética 5x24.
+
+        hash_telemetria:
+            Estrutura de indexação HASH.
+
+        arvore_colonia:
+            Estrutura hierárquica da colônia.
+
+        Processo:
+        ---------
+        1. Inicializa buffers.
+        2. Cria matriz energética.
+        3. Cria árvore estrutural.
+        4. Inicializa índices HASH.
+        5. Exibe status operacional.
+        """
+        
         # ==============================================
         # HISTÓRICO
         # ==============================================
