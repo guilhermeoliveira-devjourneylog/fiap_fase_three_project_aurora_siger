@@ -14,6 +14,7 @@
 
 from datetime import datetime
 import random
+import time
 
 # =========================================================
 # RICH TERMINAL UI
@@ -25,9 +26,6 @@ from rich.panel import Panel
 from rich.align import Align
 from rich.columns import Columns
 from rich.rule import Rule
-from rich.layout import Layout
-from rich.progress import track
-from rich.live import Live
 from rich import box
 
 console = Console()
@@ -69,6 +67,16 @@ from src.modules.AlertManager import (
 # =========================================================
 
 class UI:
+    """
+    Camada utilitária de interface Rich.
+
+    Responsável por:
+    - títulos;
+    - seções;
+    - alertas;
+    - mensagens informativas;
+    - painéis operacionais.
+    """
 
     @staticmethod
     def titulo(texto):
@@ -140,12 +148,37 @@ class UI:
 # =========================================================
 
 class AuroraSystem:
+    """
+    Sistema central da Colônia Aurora.
+
+    Responsável pela orquestração completa das camadas:
+    - sensoriamento;
+    - armazenamento;
+    - processamento;
+    - análise preditiva;
+    - automação;
+    - gerenciamento de alertas.
+
+    Fluxo operacional:
+
+    Sensores
+        ↓
+    Storage
+        ↓
+    Processing
+        ↓
+    Prediction
+        ↓
+    Decision
+        ↓
+    Alert System
+    """
 
     def __init__(self):
 
-        # ==============================================
+        # =================================================
         # CAMADAS
-        # ==============================================
+        # =================================================
 
         self.sensor_manager = SensorManager()
 
@@ -159,9 +192,15 @@ class AuroraSystem:
 
         self.alert_manager = AlertManager()
 
-        # ==============================================
+        # =================================================
+        # CONTROLE ANALÍTICO
+        # =================================================
+
+        self.ultimo_indice_processado = 0
+
+        # =================================================
         # CONFIGURAÇÃO
-        # ==============================================
+        # =================================================
 
         self._registrar_sensores()
 
@@ -174,6 +213,9 @@ class AuroraSystem:
     # =====================================================
 
     def _registrar_sensores(self):
+        """
+        Registra todos os sensores operacionais da colônia.
+        """
 
         sensores = [
 
@@ -279,14 +321,17 @@ class AuroraSystem:
         self,
         numero_ciclo: int
     ):
+        """
+        Executa um ciclo operacional completo do sistema.
+        """
 
         UI.titulo(
             f"CICLO OPERACIONAL {numero_ciclo}"
         )
 
-        # ==============================================
-        # CABEÇALHO STATUS
-        # ==============================================
+        # =================================================
+        # STATUS GLOBAL
+        # =================================================
 
         paineis = [
 
@@ -309,6 +354,20 @@ class AuroraSystem:
             ),
 
             UI.painel_status(
+                "MODELO IA",
+                (
+                    "TREINADO"
+                    if self.prediction_engine.modelo_treinado
+                    else "AGUARDANDO"
+                ),
+                (
+                    "green"
+                    if self.prediction_engine.modelo_treinado
+                    else "red"
+                )
+            ),
+
+            UI.painel_status(
                 "ALERTAS",
                 str(
                     len(
@@ -324,9 +383,9 @@ class AuroraSystem:
             Columns(paineis)
         )
 
-        # ==============================================
-        # ETAPA 1
-        # ==============================================
+        # =================================================
+        # ETAPA 1 • COLETA
+        # =================================================
 
         UI.secao(
             "1 • COLETA SENSORIAL"
@@ -334,9 +393,9 @@ class AuroraSystem:
 
         self.sensor_manager.coletar_dados()
 
-        # ==============================================
-        # ETAPA 2
-        # ==============================================
+        # =================================================
+        # ETAPA 2 • VALIDAÇÃO
+        # =================================================
 
         UI.secao(
             "2 • VALIDAÇÃO OPERACIONAL"
@@ -344,9 +403,9 @@ class AuroraSystem:
 
         self.sensor_manager.validar_dados()
 
-        # ==============================================
-        # ETAPA 3
-        # ==============================================
+        # =================================================
+        # ETAPA 3 • STORAGE
+        # =================================================
 
         UI.secao(
             "3 • ARMAZENAMENTO"
@@ -394,15 +453,21 @@ class AuroraSystem:
 
         console.print(tabela_storage)
 
-        # ==============================================
-        # ETAPA 4
-        # ==============================================
+        # =================================================
+        # ETAPA 4 • PROCESSAMENTO
+        # =================================================
 
         UI.secao(
             "4 • PROCESSAMENTO ANALÍTICO"
         )
 
-        for registro in self.storage_manager.historico:
+        novos_registros = (
+            self.storage_manager.historico[
+                self.ultimo_indice_processado:
+            ]
+        )
+
+        for registro in novos_registros:
 
             self.processing_engine.adicionar_registro(
                 sensor_id=registro.sensor_id,
@@ -410,13 +475,17 @@ class AuroraSystem:
                 valor=registro.valor
             )
 
+        self.ultimo_indice_processado = len(
+            self.storage_manager.historico
+        )
+
         self.processing_engine.processar_estatisticas()
 
         self.processing_engine.atualizar_estados()
 
-        # ==============================================
-        # ETAPA 5
-        # ==============================================
+        # =================================================
+        # ETAPA 5 • PREDICTION ENGINE
+        # =================================================
 
         UI.secao(
             "5 • ANÁLISE PREDITIVA"
@@ -440,46 +509,98 @@ class AuroraSystem:
             consumo=consumo
         )
 
-        self.prediction_engine.executar_regressao_linear()
+        previsoes = []
 
-        previsoes = self.prediction_engine.prever_geracao(
-            passos_futuros=3
-        )
+        # =============================================
+        # TREINAMENTO CONDICIONAL
+        # =============================================
 
-        tabela_previsao = Table(
-            title="Projeção Energética",
-            box=box.DOUBLE_EDGE
-        )
+        if len(
+            self.prediction_engine.historico
+        ) >= 3:
 
-        tabela_previsao.add_column(
-            "Horizonte",
-            style="cyan"
-        )
+            self.prediction_engine.executar_regressao_linear()
 
-        tabela_previsao.add_column(
-            "Energia Prevista",
-            style="green"
-        )
+            self.prediction_engine.analisar_residuos()
 
-        for i, valor in enumerate(
-            previsoes,
-            start=1
-        ):
-
-            tabela_previsao.add_row(
-                f"T+{i}",
-                f"{valor:.2f}"
+            previsoes = (
+                self.prediction_engine.prever_geracao(
+                    passos_futuros=3
+                )
             )
 
-        console.print(
-            tabela_previsao
-        )
+            # =========================================
+            # ALERTAS PREDITIVOS
+            # =========================================
+
+            for previsao in previsoes:
+
+                if previsao < 300:
+
+                    alerta = (
+                        "Previsão crítica de "
+                        "geração solar futura"
+                    )
+
+                    alerta_obj = (
+                        self.alert_manager.gerar_alerta(
+                            tipo=TipoAlerta.ENERGETICO,
+                            severidade=Severidade.CRITICA,
+                            mensagem=alerta
+                        )
+                    )
+
+                    self.alert_manager.notificar_operador(
+                        alerta_obj
+                    )
+
+        else:
+
+            UI.alerta(
+                "Histórico insuficiente "
+                "para análise preditiva"
+            )
+
+        # =============================================
+        # PROJEÇÕES
+        # =============================================
+
+        if previsoes:
+
+            tabela_previsao = Table(
+                title="Projeção Energética",
+                box=box.DOUBLE_EDGE
+            )
+
+            tabela_previsao.add_column(
+                "Horizonte",
+                style="cyan"
+            )
+
+            tabela_previsao.add_column(
+                "Energia Prevista",
+                style="green"
+            )
+
+            for i, valor in enumerate(
+                previsoes,
+                start=1
+            ):
+
+                tabela_previsao.add_row(
+                    f"T+{i}",
+                    f"{valor:.2f}"
+                )
+
+            console.print(
+                tabela_previsao
+            )
 
         self.prediction_engine.simular_cenarios()
 
-        # ==============================================
-        # ETAPA 6
-        # ==============================================
+        # =================================================
+        # ETAPA 6 • DECISION ENGINE
+        # =================================================
 
         UI.secao(
             "6 • MOTOR DE DECISÃO"
@@ -520,9 +641,9 @@ class AuroraSystem:
 
         self.decision_engine.alterar_estado()
 
-        # ==============================================
-        # ETAPA 7
-        # ==============================================
+        # =================================================
+        # ETAPA 7 • ALERTAS
+        # =================================================
 
         UI.secao(
             "7 • SISTEMA DE ALERTAS"
@@ -530,9 +651,9 @@ class AuroraSystem:
 
         self._processar_alertas()
 
-        # ==============================================
+        # =================================================
         # FINALIZAÇÃO
-        # ==============================================
+        # =================================================
 
         console.print()
 
@@ -554,6 +675,9 @@ class AuroraSystem:
     # =====================================================
 
     def _processar_alertas(self):
+        """
+        Processa alertas operacionais e preditivos.
+        """
 
         tabela_alertas = Table(
             title="Alertas Operacionais",
@@ -576,10 +700,6 @@ class AuroraSystem:
             style="white"
         )
 
-        # ==============================================
-        # ALERTAS SENSORIAIS
-        # ==============================================
-
         for alerta in self.sensor_manager.alertas:
 
             alerta_obj = self.alert_manager.gerar_alerta(
@@ -600,10 +720,6 @@ class AuroraSystem:
                 "MÉDIA",
                 alerta
             )
-
-        # ==============================================
-        # ALERTAS DECISION ENGINE
-        # ==============================================
 
         for alerta in self.decision_engine.alertas:
 
@@ -630,16 +746,9 @@ class AuroraSystem:
                 alerta_obj
             )
 
-            cor_severidade = {
-                Severidade.BAIXA: "green",
-                Severidade.MEDIA: "yellow",
-                Severidade.ALTA: "orange3",
-                Severidade.CRITICA: "red"
-            }    
-            
             tabela_alertas.add_row(
                 "DECISION",
-                f"[bold {cor_severidade[severidade]}]{severidade.name}[/]",
+                severidade.name,
                 str(alerta)
             )
 
@@ -653,6 +762,9 @@ class AuroraSystem:
         self,
         tipo_sensor: str
     ) -> float:
+        """
+        Obtém o valor mais recente de um sensor.
+        """
 
         for sensor in self.sensor_manager.sensores.values():
 
@@ -669,14 +781,13 @@ class AuroraSystem:
     # =====================================================
 
     def exibir_dashboard(self):
+        """
+        Exibe o dashboard central da colônia.
+        """
 
         UI.titulo(
             "DASHBOARD CENTRAL DA COLÔNIA"
         )
-
-        # ==============================================
-        # PAINÉIS PRINCIPAIS
-        # ==============================================
 
         dashboard = Columns([
 
@@ -711,18 +822,22 @@ class AuroraSystem:
             ),
 
             UI.painel_status(
-                "STATUS",
-                "OPERACIONAL",
-                "yellow"
+                "MODELO IA",
+                (
+                    "TREINADO"
+                    if self.prediction_engine.modelo_treinado
+                    else "AGUARDANDO"
+                ),
+                (
+                    "green"
+                    if self.prediction_engine.modelo_treinado
+                    else "red"
+                )
             )
 
         ])
 
         console.print(dashboard)
-
-        # ==============================================
-        # MONITORAMENTO
-        # ==============================================
 
         UI.secao(
             "MONITORAMENTO DE SENSORES"
@@ -730,19 +845,11 @@ class AuroraSystem:
 
         self.sensor_manager.monitorar_integridade()
 
-        # ==============================================
-        # MATRIZ ENERGÉTICA
-        # ==============================================
-
         UI.secao(
             "MATRIZ ENERGÉTICA"
         )
 
         self.storage_manager.exibir_matriz_energia()
-
-        # ==============================================
-        # ALERTAS
-        # ==============================================
 
         UI.secao(
             "CENTRAL DE ALERTAS"
@@ -750,15 +857,15 @@ class AuroraSystem:
 
         self.alert_manager.exibir_dashboard()
 
-        # ==============================================
-        # ESTATÍSTICAS
-        # ==============================================
-
         UI.secao(
             "ESTATÍSTICAS GLOBAIS"
         )
 
         self.processing_engine.processar_estatisticas()
+
+        UI.secao(
+            "DIAGNÓSTICO PREDITIVO"
+        )
 
         self.prediction_engine.exibir_estatisticas()
 
@@ -792,25 +899,31 @@ if __name__ == "__main__":
 
     sistema = AuroraSystem()
 
-    # ==============================================
-    # EXECUTA CICLOS
-    # ==============================================
+    # =====================================================
+    # CICLOS OPERACIONAIS
+    # =====================================================
 
-    for i in range(3):
+    for i in range(5):
 
         sistema.executar_ciclo(
             numero_ciclo=i + 1
         )
 
-    # ==============================================
+        # =============================================
+        # DELTA TEMPORAL REALISTA
+        # =============================================
+
+        time.sleep(1)
+
+    # =====================================================
     # DASHBOARD FINAL
-    # ==============================================
+    # =====================================================
 
     sistema.exibir_dashboard()
 
-    # ==============================================
+    # =====================================================
     # FINALIZAÇÃO
-    # ==============================================
+    # =====================================================
 
     console.print()
 
